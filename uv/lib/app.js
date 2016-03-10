@@ -4,6 +4,7 @@ define('modules/uv-shared-module/BaseCommands',["require", "exports"], function 
         }
         Commands.namespace = 'uv.';
         Commands.ACCEPT_TERMS = Commands.namespace + 'onAcceptTerms';
+        Commands.AUTHORIZATION_FAILED = Commands.namespace + 'onAuthorizationFailed';
         Commands.AUTHORIZATION_OCCURRED = Commands.namespace + 'onAuthorizationOccurred';
         Commands.BOOKMARK = Commands.namespace + 'onBookmark';
         Commands.CANVAS_INDEX_CHANGE_FAILED = Commands.namespace + 'onCanvasIndexChangeFailed';
@@ -19,9 +20,9 @@ define('modules/uv-shared-module/BaseCommands',["require", "exports"], function 
         Commands.END = Commands.namespace + 'onEnd';
         Commands.ESCAPE = Commands.namespace + 'onEscape';
         Commands.EXTERNAL_LINK_CLICKED = Commands.namespace + 'onExternalLinkClicked';
+        Commands.FORBIDDEN = Commands.namespace + 'onForbidden';
         Commands.FEEDBACK = Commands.namespace + 'onFeedback';
         Commands.PARENT_EXIT_FULLSCREEN = Commands.namespace + 'onParentExitFullScreen';
-        Commands.HIDE_CLICKTHROUGH_DIALOGUE = Commands.namespace + 'onHideClickthroughDialogue';
         Commands.HIDE_DOWNLOAD_DIALOGUE = Commands.namespace + 'onHideDownloadDialogue';
         Commands.HIDE_EMBED_DIALOGUE = Commands.namespace + 'onHideEmbedDialogue';
         Commands.HIDE_EXTERNALCONTENT_DIALOGUE = Commands.namespace + 'onHideExternalContentDialogue';
@@ -29,6 +30,8 @@ define('modules/uv-shared-module/BaseCommands',["require", "exports"], function 
         Commands.HIDE_HELP_DIALOGUE = Commands.namespace + 'onHideHelpDialogue';
         Commands.HIDE_INFORMATION = Commands.namespace + 'onHideInformation';
         Commands.HIDE_LOGIN_DIALOGUE = Commands.namespace + 'onHideLoginDialogue';
+        Commands.HIDE_CLICKTHROUGH_DIALOGUE = Commands.namespace + 'onHideClickthroughDialogue';
+        Commands.HIDE_RESTRICTED_DIALOGUE = Commands.namespace + 'onHideRestrictedDialogue';
         Commands.HIDE_OVERLAY = Commands.namespace + 'onHideOverlay';
         Commands.HIDE_SETTINGS_DIALOGUE = Commands.namespace + 'onHideSettingsDialogue';
         Commands.HOME = Commands.namespace + 'onHome';
@@ -38,6 +41,7 @@ define('modules/uv-shared-module/BaseCommands',["require", "exports"], function 
         Commands.LEFTPANEL_EXPAND_FULL_FINISH = Commands.namespace + 'onLeftPanelExpandFullFinish';
         Commands.LEFTPANEL_EXPAND_FULL_START = Commands.namespace + 'onLeftPanelExpandFullStart';
         Commands.LOAD = Commands.namespace + 'onLoad';
+        Commands.LOAD_FAILED = Commands.namespace + 'onLoadFailed';
         Commands.MINUS = Commands.namespace + 'onMinus';
         Commands.NOT_FOUND = Commands.namespace + 'onNotFound';
         Commands.OPEN = Commands.namespace + 'onOpen';
@@ -52,6 +56,7 @@ define('modules/uv-shared-module/BaseCommands',["require", "exports"], function 
         Commands.RESIZE = Commands.namespace + 'onResize';
         Commands.RESOURCE_DEGRADED = Commands.namespace + 'onResourceDegraded';
         Commands.RETURN = Commands.namespace + 'onReturn';
+        Commands.RETRY = Commands.namespace + 'onRetry';
         Commands.RIGHT_ARROW = Commands.namespace + 'onRightArrow';
         Commands.RIGHTPANEL_COLLAPSE_FULL_FINISH = Commands.namespace + 'onRightPanelCollapseFullFinish';
         Commands.RIGHTPANEL_COLLAPSE_FULL_START = Commands.namespace + 'onRightPanelCollapseFullStart';
@@ -59,7 +64,6 @@ define('modules/uv-shared-module/BaseCommands',["require", "exports"], function 
         Commands.RIGHTPANEL_EXPAND_FULL_START = Commands.namespace + 'onRightPanelExpandFullStart';
         Commands.SEQUENCE_INDEX_CHANGED = Commands.namespace + 'onSequenceIndexChanged';
         Commands.SETTINGS_CHANGED = Commands.namespace + 'onSettingsChanged';
-        Commands.SHOW_CLICKTHROUGH_DIALOGUE = Commands.namespace + 'onShowClickThroughDialogue';
         Commands.SHOW_DOWNLOAD_DIALOGUE = Commands.namespace + 'onShowDownloadDialogue';
         Commands.SHOW_EMBED_DIALOGUE = Commands.namespace + 'onShowEmbedDialogue';
         Commands.SHOW_EXTERNALCONTENT_DIALOGUE = Commands.namespace + 'onShowExternalContentDialogue';
@@ -67,6 +71,8 @@ define('modules/uv-shared-module/BaseCommands',["require", "exports"], function 
         Commands.SHOW_HELP_DIALOGUE = Commands.namespace + 'onShowHelpDialogue';
         Commands.SHOW_INFORMATION = Commands.namespace + 'onShowInformation';
         Commands.SHOW_LOGIN_DIALOGUE = Commands.namespace + 'onShowLoginDialogue';
+        Commands.SHOW_CLICKTHROUGH_DIALOGUE = Commands.namespace + 'onShowClickThroughDialogue';
+        Commands.SHOW_RESTRICTED_DIALOGUE = Commands.namespace + 'onShowRestrictedDialogue';
         Commands.SHOW_OVERLAY = Commands.namespace + 'onShowOverlay';
         Commands.SHOW_SETTINGS_DIALOGUE = Commands.namespace + 'onShowSettingsDialogue';
         Commands.THUMB_SELECTED = Commands.namespace + 'onThumbSelected';
@@ -582,42 +588,31 @@ define('modules/uv-dialogues-module/ClickThroughDialogue',["require", "exports",
             <div>\
                 <p class="message scroll"></p>\
                 <div class="buttons">\
-                    <a class="viewTerms" href="#"></a>\
                     <a class="acceptTerms btn btn-primary" href="#" target="_parent"></a>\
                 </div>\
             </div>');
             this.$message = this.$content.find(".message");
-            this.$message.targetBlank();
-            this.$viewTermsButton = this.$content.find(".viewTerms");
-            this.$viewTermsButton.text(this.content.viewTerms);
             this.$acceptTermsButton = this.$content.find(".acceptTerms");
+            // TODO: get from config this.$acceptTermsButton.text(this.content.acceptTerms); // figure out config
+            this.$acceptTermsButton.text("Accept Terms and Open");
             this.$element.hide();
-            this.$viewTermsButton.on('click', function (e) {
-                e.preventDefault();
-                _this.$message.empty();
-                _this.$message.addClass('loading');
-                _this.$message.load(_this.resource.clickThroughService.getProperty('fullTermsSimple'), function () {
-                    _this.$message.removeClass('loading');
-                    _this.$message.targetBlank();
-                    _this.$viewTermsButton.hide();
-                });
-                $.publish(BaseCommands.VIEW_FULL_TERMS);
-            });
             this.$acceptTermsButton.on('click', function (e) {
                 e.preventDefault();
                 _this.close();
                 $.publish(BaseCommands.ACCEPT_TERMS);
                 if (_this.acceptCallback)
                     _this.acceptCallback();
-                //var redirectUrl = this.service.id + escape(parent.document.URL);
-                //this.extension.redirect(redirectUrl);
             });
         };
         ClickThroughDialogue.prototype.open = function () {
             _super.prototype.open.call(this);
             this.$title.text(this.resource.clickThroughService.getProperty('label'));
             this.$message.html(this.resource.clickThroughService.getProperty('description'));
-            this.$acceptTermsButton.text(this.resource.clickThroughService.getProperty('actionLabel'));
+            this.$message.targetBlank();
+            this.$message.find('a').on('click', function () {
+                var url = $(this).attr('href');
+                $.publish(BaseCommands.EXTERNAL_LINK_CLICKED, [url]);
+            });
             this.resize();
         };
         ClickThroughDialogue.prototype.resize = function () {
@@ -626,6 +621,80 @@ define('modules/uv-dialogues-module/ClickThroughDialogue',["require", "exports",
         return ClickThroughDialogue;
     })(Dialogue);
     return ClickThroughDialogue;
+});
+
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+define('modules/uv-dialogues-module/RestrictedDialogue',["require", "exports", "../uv-shared-module/BaseCommands", "../uv-shared-module/Dialogue"], function (require, exports, BaseCommands, Dialogue) {
+    var RestrictedDialogue = (function (_super) {
+        __extends(RestrictedDialogue, _super);
+        function RestrictedDialogue($element) {
+            _super.call(this, $element);
+        }
+        RestrictedDialogue.prototype.create = function () {
+            var _this = this;
+            this.setConfig('restrictedDialogue');
+            _super.prototype.create.call(this);
+            this.openCommand = BaseCommands.SHOW_RESTRICTED_DIALOGUE;
+            this.closeCommand = BaseCommands.HIDE_RESTRICTED_DIALOGUE;
+            $.subscribe(this.openCommand, function (s, e) {
+                _this.acceptCallback = e.acceptCallback;
+                _this.options = e.options;
+                _this.resource = e.resource;
+                _this.open();
+            });
+            $.subscribe(this.closeCommand, function (e) {
+                _this.close();
+            });
+            this.$title = $('<h1></h1>');
+            this.$content.append(this.$title);
+            this.$content.append('\
+            <div>\
+                <p class="message scroll"></p>\
+                <div class="buttons">\
+                    <a class="cancel btn btn-primary" href="#" target="_parent"></a>\
+                </div>\
+            </div>');
+            this.$message = this.$content.find('.message');
+            this.$message.targetBlank();
+            // todo: revisit?
+            //this.$nextVisibleButton = this.$content.find('.nextvisible');
+            //this.$nextVisibleButton.text(this.content.nextVisibleItem);
+            this.$cancelButton = this.$content.find('.cancel');
+            this.$cancelButton.text(this.content.cancel);
+            this.$element.hide();
+            this.$cancelButton.on('click', function (e) {
+                e.preventDefault();
+                _this.close();
+            });
+        };
+        RestrictedDialogue.prototype.open = function () {
+            _super.prototype.open.call(this);
+            this.$title.text(this.resource.restrictedService.getProperty('label'));
+            var message = this.resource.restrictedService.getProperty('description');
+            this.$message.html(message);
+            this.$message.targetBlank();
+            this.$message.find('a').on('click', function () {
+                var url = $(this).attr('href');
+                $.publish(BaseCommands.EXTERNAL_LINK_CLICKED, [url]);
+            });
+            this.resize();
+        };
+        RestrictedDialogue.prototype.close = function () {
+            _super.prototype.close.call(this);
+            if (this.acceptCallback) {
+                this.acceptCallback();
+            }
+        };
+        RestrictedDialogue.prototype.resize = function () {
+            _super.prototype.resize.call(this);
+        };
+        return RestrictedDialogue;
+    })(Dialogue);
+    return RestrictedDialogue;
 });
 
 define('modules/uv-shared-module/ExternalResource',["require", "exports"], function (require, exports) {
@@ -639,13 +708,23 @@ define('modules/uv-shared-module/ExternalResource',["require", "exports"], funct
         ExternalResource.prototype._parseAuthServices = function (resource) {
             this.clickThroughService = manifesto.getService(resource, manifesto.ServiceProfile.clickThrough().toString());
             this.loginService = manifesto.getService(resource, manifesto.ServiceProfile.login().toString());
-            if (this.loginService) {
+            this.restrictedService = manifesto.getService(resource, manifesto.ServiceProfile.restricted().toString());
+            // todo: create this.preferredService?
+            if (this.clickThroughService) {
+                this.logoutService = this.clickThroughService.getService(manifesto.ServiceProfile.logout().toString());
+                this.tokenService = this.clickThroughService.getService(manifesto.ServiceProfile.token().toString());
+            }
+            else if (this.loginService) {
                 this.logoutService = this.loginService.getService(manifesto.ServiceProfile.logout().toString());
                 this.tokenService = this.loginService.getService(manifesto.ServiceProfile.token().toString());
             }
+            else if (this.restrictedService) {
+                this.logoutService = this.restrictedService.getService(manifesto.ServiceProfile.logout().toString());
+                this.tokenService = this.restrictedService.getService(manifesto.ServiceProfile.token().toString());
+            }
         };
         ExternalResource.prototype.isAccessControlled = function () {
-            if (this.clickThroughService || this.loginService) {
+            if (this.clickThroughService || this.loginService || this.restrictedService) {
                 return true;
             }
             return false;
@@ -760,9 +839,10 @@ define('modules/uv-dialogues-module/LoginDialogue',["require", "exports", "../uv
             _super.prototype.create.call(this);
             this.openCommand = BaseCommands.SHOW_LOGIN_DIALOGUE;
             this.closeCommand = BaseCommands.HIDE_LOGIN_DIALOGUE;
-            $.subscribe(this.openCommand, function (e, params) {
-                _this.acceptCallback = params.acceptCallback;
-                _this.resource = params.resource;
+            $.subscribe(this.openCommand, function (s, e) {
+                _this.acceptCallback = e.acceptCallback;
+                _this.options = e.options;
+                _this.resource = e.resource;
                 _this.open();
             });
             $.subscribe(this.closeCommand, function (e) {
@@ -775,11 +855,14 @@ define('modules/uv-dialogues-module/LoginDialogue',["require", "exports", "../uv
                 <p class="message scroll"></p>\
                 <div class="buttons">\
                     <a class="login btn btn-primary" href="#" target="_parent"></a>\
+                    <a class="cancel btn btn-primary" href="#"></a>\
                 </div>\
             </div>');
             this.$message = this.$content.find('.message');
             this.$loginButton = this.$content.find('.login');
             this.$loginButton.text(this.content.login);
+            this.$cancelButton = this.$content.find('.cancel');
+            this.$cancelButton.text(this.content.cancel);
             this.$element.hide();
             this.$loginButton.on('click', function (e) {
                 e.preventDefault();
@@ -787,16 +870,30 @@ define('modules/uv-dialogues-module/LoginDialogue',["require", "exports", "../uv
                 if (_this.acceptCallback)
                     _this.acceptCallback();
             });
+            this.$cancelButton.on('click', function (e) {
+                e.preventDefault();
+                _this.close();
+            });
         };
         LoginDialogue.prototype.open = function () {
             _super.prototype.open.call(this);
             this.$title.text(this.resource.loginService.getProperty('label'));
-            this.$message.html(this.resource.loginService.getProperty('description'));
+            var message = this.resource.loginService.getProperty('description');
+            if (this.options.warningMessage) {
+                message = '<span class="warning">' + this.provider.config.content[this.options.warningMessage] + '</span><span class="description">' + message + '</span>';
+            }
+            this.$message.html(message);
             this.$message.targetBlank();
             this.$message.find('a').on('click', function () {
                 var url = $(this).attr('href');
                 $.publish(BaseCommands.EXTERNAL_LINK_CLICKED, [url]);
             });
+            if (this.options.showCancelButton) {
+                this.$cancelButton.show();
+            }
+            else {
+                this.$cancelButton.hide();
+            }
             this.resize();
         };
         LoginDialogue.prototype.resize = function () {
@@ -929,7 +1026,17 @@ define('modules/uv-shared-module/Shell',["require", "exports", "./BaseCommands",
     return Shell;
 });
 
-define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCommands", "../../BootstrapParams", "../../modules/uv-dialogues-module/ClickThroughDialogue", "./ExternalResource", "./InformationArgs", "./InformationType", "../../modules/uv-dialogues-module/LoginDialogue", "../../Params", "./Shell"], function (require, exports, BaseCommands, BootstrapParams, ClickThroughDialogue, ExternalResource, InformationArgs, InformationType, LoginDialogue, Params, Shell) {
+define('modules/uv-shared-module/LoginWarningMessages',["require", "exports"], function (require, exports) {
+    var LoginWarningMessages = (function () {
+        function LoginWarningMessages() {
+        }
+        LoginWarningMessages.FORBIDDEN = "forbiddenResourceMessage";
+        return LoginWarningMessages;
+    })();
+    return LoginWarningMessages;
+});
+
+define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCommands", "../../BootstrapParams", "../../modules/uv-dialogues-module/ClickThroughDialogue", "../../modules/uv-dialogues-module/RestrictedDialogue", "./ExternalResource", "./InformationArgs", "./InformationType", "../../modules/uv-dialogues-module/LoginDialogue", "../../Params", "./Shell", "./LoginWarningMessages"], function (require, exports, BaseCommands, BootstrapParams, ClickThroughDialogue, RestrictedDialogue, ExternalResource, InformationArgs, InformationType, LoginDialogue, Params, Shell, LoginWarningMessages) {
     var BaseExtension = (function () {
         function BaseExtension(bootstrapper) {
             this.shifted = false;
@@ -1053,6 +1160,10 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
             $.subscribe(BaseCommands.ACCEPT_TERMS, function () {
                 _this.triggerSocket(BaseCommands.ACCEPT_TERMS);
             });
+            $.subscribe(BaseCommands.AUTHORIZATION_FAILED, function () {
+                _this.triggerSocket(BaseCommands.AUTHORIZATION_FAILED);
+                _this.showMessage(_this.provider.config.content.authorisationFailedMessage);
+            });
             $.subscribe(BaseCommands.AUTHORIZATION_OCCURRED, function () {
                 _this.triggerSocket(BaseCommands.AUTHORIZATION_OCCURRED);
             });
@@ -1099,6 +1210,10 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
             });
             $.subscribe(BaseCommands.FEEDBACK, function () {
                 _this.feedback();
+            });
+            $.subscribe(BaseCommands.FORBIDDEN, function () {
+                _this.triggerSocket(BaseCommands.FORBIDDEN);
+                $.publish(BaseCommands.OPEN_EXTERNAL_RESOURCE);
             });
             $.subscribe(BaseCommands.HIDE_DOWNLOAD_DIALOGUE, function () {
                 _this.triggerSocket(BaseCommands.HIDE_DOWNLOAD_DIALOGUE);
@@ -1201,9 +1316,6 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
             $.subscribe(BaseCommands.SETTINGS_CHANGED, function (e, args) {
                 _this.triggerSocket(BaseCommands.SETTINGS_CHANGED, args);
             });
-            $.subscribe(BaseCommands.SHOW_CLICKTHROUGH_DIALOGUE, function () {
-                _this.triggerSocket(BaseCommands.SHOW_CLICKTHROUGH_DIALOGUE);
-            });
             $.subscribe(BaseCommands.SHOW_DOWNLOAD_DIALOGUE, function () {
                 _this.triggerSocket(BaseCommands.SHOW_DOWNLOAD_DIALOGUE);
             });
@@ -1224,6 +1336,12 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
             });
             $.subscribe(BaseCommands.SHOW_LOGIN_DIALOGUE, function () {
                 _this.triggerSocket(BaseCommands.SHOW_LOGIN_DIALOGUE);
+            });
+            $.subscribe(BaseCommands.SHOW_CLICKTHROUGH_DIALOGUE, function () {
+                _this.triggerSocket(BaseCommands.SHOW_CLICKTHROUGH_DIALOGUE);
+            });
+            $.subscribe(BaseCommands.SHOW_RESTRICTED_DIALOGUE, function () {
+                _this.triggerSocket(BaseCommands.SHOW_RESTRICTED_DIALOGUE);
             });
             $.subscribe(BaseCommands.SHOW_OVERLAY, function () {
                 _this.triggerSocket(BaseCommands.SHOW_OVERLAY);
@@ -1272,6 +1390,9 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
             this.$clickThroughDialogue = $('<div class="overlay clickthrough"></div>');
             Shell.$overlays.append(this.$clickThroughDialogue);
             this.clickThroughDialogue = new ClickThroughDialogue(this.$clickThroughDialogue);
+            this.$restrictedDialogue = $('<div class="overlay login"></div>');
+            Shell.$overlays.append(this.$restrictedDialogue);
+            this.restrictedDialogue = new RestrictedDialogue(this.$restrictedDialogue);
             this.$loginDialogue = $('<div class="overlay login"></div>');
             Shell.$overlays.append(this.$loginDialogue);
             this.loginDialogue = new LoginDialogue(this.$loginDialogue);
@@ -1408,13 +1529,25 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
             });
             var storageStrategy = this.provider.config.options.tokenStorage;
             return new Promise(function (resolve) {
-                manifesto.loadExternalResources(resourcesToLoad, storageStrategy, _this.clickThrough, _this.login, _this.getAccessToken, _this.storeAccessToken, _this.getStoredAccessToken, _this.handleExternalResourceResponse).then(function (r) {
+                manifesto.loadExternalResources(resourcesToLoad, storageStrategy, _this.clickThrough, _this.restricted, _this.login, _this.getAccessToken, _this.storeAccessToken, _this.getStoredAccessToken, _this.handleExternalResourceResponse).then(function (r) {
                     _this.provider.resources = _.map(r, function (resource) {
                         return _.toPlainObject(resource.data);
                     });
                     resolve(_this.provider.resources);
-                })['catch'](function (errorMessage) {
-                    _this.showMessage(errorMessage);
+                })['catch'](function (error) {
+                    switch (error.name) {
+                        case manifesto.StatusCodes.AUTHORIZATION_FAILED.toString():
+                            $.publish(BaseCommands.AUTHORIZATION_FAILED);
+                            break;
+                        case manifesto.StatusCodes.FORBIDDEN.toString():
+                            $.publish(BaseCommands.FORBIDDEN);
+                            break;
+                        case manifesto.StatusCodes.RESTRICTED.toString():
+                            // do nothing
+                            break;
+                        default:
+                            _this.showMessage(error.message || error);
+                    }
                 });
             });
         };
@@ -1536,8 +1669,24 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
                     }]);
             });
         };
+        BaseExtension.prototype.restricted = function (resource) {
+            return new Promise(function (resolve, reject) {
+                $.publish(BaseCommands.SHOW_RESTRICTED_DIALOGUE, [{
+                        resource: resource,
+                        acceptCallback: function () {
+                            $.publish(BaseCommands.LOAD_FAILED);
+                            reject(resource);
+                        }
+                    }]);
+            });
+        };
         BaseExtension.prototype.login = function (resource) {
             return new Promise(function (resolve) {
+                var options = {};
+                if (resource.status === HTTPStatusCode.FORBIDDEN) {
+                    options.warningMessage = LoginWarningMessages.FORBIDDEN;
+                    options.showCancelButton = true;
+                }
                 $.publish(BaseCommands.SHOW_LOGIN_DIALOGUE, [{
                         resource: resource,
                         acceptCallback: function () {
@@ -1549,21 +1698,32 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
                                     resolve();
                                 }
                             }, 500);
-                        }
+                        },
+                        options: options
                     }]);
             });
         };
-        BaseExtension.prototype.getAccessToken = function (resource) {
+        BaseExtension.prototype.getAccessToken = function (resource, rejectOnError) {
             return new Promise(function (resolve, reject) {
                 $.getJSON(resource.tokenService.id + "?callback=?", function (token) {
                     if (token.error) {
-                        reject(token.errorDescription);
+                        if (rejectOnError) {
+                            reject(token.errorDescription);
+                        }
+                        else {
+                            resolve(null);
+                        }
                     }
                     else {
                         resolve(token);
                     }
                 }).fail(function (error) {
-                    reject(error);
+                    if (rejectOnError) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(null);
+                    }
                 });
             });
         };
@@ -1575,11 +1735,16 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
         };
         BaseExtension.prototype.getStoredAccessToken = function (resource, storageStrategy) {
             return new Promise(function (resolve, reject) {
-                var foundToken;
+                var foundItems = [];
+                var item;
+                // try to match on the tokenService, if the resource has one:
+                if (resource.tokenService) {
+                    item = Utils.Storage.get(resource.tokenService.id, new Utils.StorageType(storageStrategy));
+                }
                 // first try an exact match of the url
-                var item = Utils.Storage.get(resource.dataUri, new Utils.StorageType(storageStrategy));
+                //var item: storage.StorageItem = Utils.Storage.get(resource.dataUri, new Utils.StorageType(storageStrategy));
                 if (item) {
-                    foundToken = item.value;
+                    foundItems.push(item);
                 }
                 else {
                     // find an access token for the domain
@@ -1588,9 +1753,17 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
                     for (var i = 0; i < items.length; i++) {
                         item = items[i];
                         if (item.key.contains(domain)) {
-                            foundToken = item.value;
+                            foundItems.push(item);
                         }
                     }
+                }
+                // sort by expiresAt
+                foundItems = _.sortBy(foundItems, function (item) {
+                    return item.expiresAt;
+                });
+                var foundToken;
+                if (foundItems.length) {
+                    foundToken = foundItems.last().value;
                 }
                 resolve(foundToken);
             });
@@ -1617,6 +1790,12 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
                         else {
                             reject(resource.error.statusText);
                         }
+                    }
+                    else if (resource.error.status === HTTPStatusCode.FORBIDDEN) {
+                        var error = new Error();
+                        error.message = "Forbidden";
+                        error.name = manifesto.StatusCodes.FORBIDDEN.toString();
+                        reject(error);
                     }
                     else {
                         reject(resource.error.statusText);
@@ -1851,6 +2030,8 @@ define('modules/uv-dialogues-module/EmbedDialogue',["require", "exports", "../uv
             this.$firstRow.find('.leftCol').append(this.$link);
             this.$image = $('<img class="share" />');
             this.$link.append(this.$image);
+            this.$url = $('<input class="url" type="text"></input>');
+            this.$firstRow.find('.rightCol').append(this.$url);
             this.$intro = $('<p>' + this.content.instructions + '</p>');
             this.$firstRow.find('.rightCol').append(this.$intro);
             this.$code = $('<textarea class="code"></textarea>');
@@ -1886,8 +2067,9 @@ define('modules/uv-dialogues-module/EmbedDialogue',["require", "exports", "../uv
             this.$customHeight = $('<input id="height" type="text" maxlength="5" />');
             this.$customSizeHeightWrap.append(this.$customHeight);
             this.$customSizeHeightWrap.append('<span>px</span>');
-            // initialise ui.
-            // ui event handlers.
+            this.$url.click(function () {
+                $(this).select();
+            });
             this.$code.focus(function () {
                 $(this).select();
             });
@@ -1983,6 +2165,7 @@ define('modules/uv-dialogues-module/EmbedDialogue',["require", "exports", "../uv
             }
             this.$link.attr('href', thumbnail);
             this.$image.attr('src', thumbnail);
+            this.$url.val(this.provider.getShareUrl());
         };
         EmbedDialogue.prototype.close = function () {
             _super.prototype.close.call(this);
@@ -2918,26 +3101,76 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-define('modules/uv-moreinforightpanel-module/MoreInfoRightPanel',["require", "exports", "../uv-shared-module/RightPanel"], function (require, exports, RightPanel) {
+define('modules/uv-moreinforightpanel-module/MoreInfoRightPanel',["require", "exports", "../uv-shared-module/BaseCommands", "../uv-shared-module/RightPanel"], function (require, exports, BaseCommands, RightPanel) {
     var MoreInfoRightPanel = (function (_super) {
         __extends(MoreInfoRightPanel, _super);
         function MoreInfoRightPanel($element) {
             _super.call(this, $element);
+            this.limitType = "lines";
+            this.limit = 4;
         }
         MoreInfoRightPanel.prototype.create = function () {
+            var _this = this;
             this.setConfig('moreInfoRightPanel');
             _super.prototype.create.call(this);
+            if (this.config.options.textLimitType) {
+                this.limitType = this.config.options.textLimitType;
+            }
+            if (this.limitType === "lines") {
+                this.limit = this.config.options.textLimit ? this.config.options.textLimit : 4;
+            }
+            else if (this.limitType === "chars") {
+                this.limit = this.config.options.textLimit ? this.config.options.textLimit : 130;
+            }
+            this.aggregateValuesConfig = this.readConfig(this.options.aggregateValues);
+            this.canvasExcludeConfig = this.readConfig(this.options.canvasExclude);
+            this.manifestData = this.getManifestData();
+            this.canvasData = [];
             this.moreInfoItemTemplate = $('<div class="item">\
                                            <div class="header"></div>\
                                            <div class="text"></div>\
                                        </div>');
             this.$items = $('<div class="items"></div>');
             this.$main.append(this.$items);
+            this.$canvasItems = $('<div class="items"></div>');
+            this.$main.append(this.$canvasItems);
             this.$noData = $('<div class="noData">' + this.content.noData + '</div>');
             this.$main.append(this.$noData);
             this.$expandButton.attr('tabindex', '4');
             this.$collapseButton.attr('tabindex', '4');
             this.setTitle(this.content.title);
+            $.subscribe(BaseCommands.CANVAS_INDEX_CHANGED, function (e, canvasIndex) {
+                _this.canvasData = _this.getCanvasData(_this.provider.getCanvasByIndex(canvasIndex));
+                _this.displayInfo();
+            });
+        };
+        MoreInfoRightPanel.prototype.getManifestData = function () {
+            var data = this.provider.getMetadata();
+            if (this.options.displayOrder) {
+                data = this.sort(data, this.readConfig(this.options.displayOrder));
+            }
+            if (this.options.manifestExclude) {
+                data = this.exclude(data, this.readConfig(this.options.manifestExclude));
+            }
+            return this.flatten(data);
+        };
+        MoreInfoRightPanel.prototype.getCanvasData = function (canvas) {
+            var data = this.provider.getCanvasMetadata(canvas);
+            if (this.canvasExcludeConfig.length !== 0) {
+                data = this.exclude(data, this.canvasExcludeConfig);
+            }
+            return this.flatten(data);
+        };
+        MoreInfoRightPanel.prototype.readConfig = function (config) {
+            if (config) {
+                return config
+                    .toLowerCase()
+                    .replace(/ /g, "")
+                    .split(',');
+            }
+            else {
+                return [];
+            }
         };
         MoreInfoRightPanel.prototype.toggleFinish = function () {
             _super.prototype.toggleFinish.call(this);
@@ -2948,61 +3181,48 @@ define('modules/uv-moreinforightpanel-module/MoreInfoRightPanel',["require", "ex
         MoreInfoRightPanel.prototype.getInfo = function () {
             // show loading icon.
             this.$main.addClass('loading');
-            var data = this.provider.getMetadata();
-            this.displayInfo(data);
+            this.displayInfo();
         };
-        MoreInfoRightPanel.prototype.displayInfo = function (data) {
-            var _this = this;
+        MoreInfoRightPanel.prototype.displayInfo = function () {
             this.$main.removeClass('loading');
-            if (!data) {
+            if (this.manifestData.length == 0 && this.canvasData.length == 0) {
                 this.$noData.show();
                 return;
             }
             this.$noData.hide();
-            var limitType = "lines";
-            if (this.config.options.textLimitType) {
-                limitType = this.config.options.textLimitType;
-            }
-            var limit;
-            if (limitType === "lines") {
-                limit = this.config.options.textLimit ? this.config.options.textLimit : 4;
-            }
-            else if (limitType === "chars") {
-                limit = this.config.options.textLimit ? this.config.options.textLimit : 130;
-            }
-            var displayOrderConfig = this.options.displayOrder;
-            if (displayOrderConfig) {
-                displayOrderConfig = displayOrderConfig.toLowerCase();
-                displayOrderConfig = displayOrderConfig.replace(/ /g, "");
-                var displayOrder = displayOrderConfig.split(',');
-                // sort items
-                var sorted = [];
-                _.each(displayOrder, function (item) {
-                    var match = data.en().where((function (x) { return x.label.toLowerCase() === item; })).first();
-                    if (match) {
-                        sorted.push(match);
-                        data.remove(match);
-                    }
-                });
-                // add remaining items that were not in the displayOrder.
-                _.each(data, function (item) {
-                    sorted.push(item);
-                });
-                data = sorted;
-            }
-            // Exclusions
-            var excludeConfig = this.options.exclude;
-            if (excludeConfig) {
-                excludeConfig = excludeConfig.toLowerCase();
-                excludeConfig = excludeConfig.replace(/ /g, "");
-                var exclude = excludeConfig.split(',');
-                _.each(exclude, function (item) {
-                    var match = data.en().where((function (x) { return x.label.toLowerCase() === item; })).first();
-                    if (match) {
-                        data.remove(match);
-                    }
-                });
-            }
+            var manifestRenderData = $.extend(true, [], this.manifestData);
+            var canvasRenderData = $.extend(true, [], this.canvasData);
+            this.aggregateValues(manifestRenderData, canvasRenderData);
+            this.renderElement(this.$items, manifestRenderData, this.content.manifestHeader, canvasRenderData.length !== 0);
+            this.renderElement(this.$canvasItems, canvasRenderData, this.content.canvasHeader, manifestRenderData.length !== 0);
+        };
+        MoreInfoRightPanel.prototype.sort = function (data, displayOrder) {
+            // sort items
+            var sorted = [];
+            _.each(displayOrder, function (item) {
+                var match = data.en().where((function (x) { return x.label.toLowerCase() === item; })).first();
+                if (match) {
+                    sorted.push(match);
+                    data.remove(match);
+                }
+            });
+            // add remaining items that were not in the displayOrder.
+            _.each(data, function (item) {
+                sorted.push(item);
+            });
+            return sorted;
+        };
+        MoreInfoRightPanel.prototype.exclude = function (data, excludeConfig) {
+            var excluded = $.extend(true, [], data);
+            _.each(excludeConfig, function (item) {
+                var match = excluded.en().where((function (x) { return x.label.toLowerCase() === item; })).first();
+                if (match) {
+                    excluded.remove(match);
+                }
+            });
+            return excluded;
+        };
+        MoreInfoRightPanel.prototype.flatten = function (data) {
             // flatten metadata into array.
             var flattened = [];
             _.each(data, function (item) {
@@ -3013,17 +3233,46 @@ define('modules/uv-moreinforightpanel-module/MoreInfoRightPanel',["require", "ex
                     flattened.push(item);
                 }
             });
-            data = flattened;
-            _.each(data, function (item) {
-                var built = _this.buildItem(item);
-                _this.$items.append(built);
-                if (limitType === "lines") {
-                    built.find('.text').toggleExpandTextByLines(limit, _this.content.less, _this.content.more);
-                }
-                else if (limitType === "chars") {
-                    built.find('.text').ellipsisHtmlFixed(limit, null);
-                }
-            });
+            return flattened;
+        };
+        MoreInfoRightPanel.prototype.aggregateValues = function (fromData, toData) {
+            var _this = this;
+            if (this.aggregateValuesConfig.length !== 0) {
+                _.each(toData, function (item) {
+                    _.each(_this.aggregateValuesConfig, function (value) {
+                        if (item.label.toLowerCase() == value) {
+                            var manifestIndex = _.findIndex(fromData, function (x) { return x.label.toLowerCase() == value.toLowerCase(); });
+                            if (manifestIndex != -1) {
+                                var data = fromData.splice(manifestIndex, 1)[0];
+                                item.value = data.value + item.value;
+                            }
+                        }
+                    });
+                });
+            }
+        };
+        MoreInfoRightPanel.prototype.renderElement = function (element, data, header, renderHeader) {
+            var _this = this;
+            element.empty();
+            if (data.length !== 0) {
+                if (renderHeader && header)
+                    element.append(this.buildHeader(header));
+                _.each(data, function (item) {
+                    var built = _this.buildItem(item);
+                    element.append(built);
+                    if (_this.limitType === "lines") {
+                        built.find('.text').toggleExpandTextByLines(_this.limit, _this.content.less, _this.content.more);
+                    }
+                    else if (_this.limitType === "chars") {
+                        built.find('.text').ellipsisHtmlFixed(_this.limit, null);
+                    }
+                });
+            }
+        };
+        MoreInfoRightPanel.prototype.buildHeader = function (label) {
+            var $header = $('<div class="header"></div>');
+            $header.html(this.provider.sanitize(label));
+            return $header;
         };
         MoreInfoRightPanel.prototype.buildItem = function (item) {
             var $elem = this.moreInfoItemTemplate.clone();
@@ -3067,7 +3316,7 @@ define('modules/uv-moreinforightpanel-module/MoreInfoRightPanel',["require", "ex
 });
 
 define('_Version',["require", "exports"], function (require, exports) {
-    exports.Version = '1.7.2';
+    exports.Version = '1.7.9';
 });
 
 var __extends = (this && this.__extends) || function (d, b) {
@@ -3377,6 +3626,13 @@ define('modules/uv-contentleftpanel-module/GalleryView',["require", "exports", "
             return thumbs;
         };
         GalleryView.prototype._multiSelectStateChange = function (state) {
+            this.multiSelectState = state;
+            if (state.enabled) {
+                this.$thumbs.addClass("multiSelect");
+            }
+            else {
+                this.$thumbs.removeClass("multiSelect");
+            }
             for (var j = 0; j < state.canvases.length; j++) {
                 var canvas = state.canvases[j];
                 var thumb = this._getThumbByCanvas(canvas);
@@ -4193,18 +4449,18 @@ define('modules/uv-contentleftpanel-module/ContentLeftPanel',["require", "export
             $.subscribe(Commands.EXIT_MULTISELECT_MODE, function () {
                 that._reset();
                 that.multiSelectState.enabled = false;
-                $.publish(Commands.MULTISELECT_CHANGE, [_this.multiSelectState]);
+                $.publish(Commands.MULTISELECT_CHANGE, [that.multiSelectState]);
                 that.setTitle(that.content.title);
-                _this.$multiSelectOptions.hide();
+                that.$multiSelectOptions.hide();
             });
             $.subscribe(BaseCommands.LEFTPANEL_COLLAPSE_FULL_START, function () {
-                if (_this.multiSelectState.enabled) {
+                if (that.multiSelectState.enabled) {
                     $.publish(Commands.EXIT_MULTISELECT_MODE);
                 }
             });
             $.subscribe(BaseCommands.LEFTPANEL_EXPAND_FULL_START, function () {
-                if (_this.multiSelectState.enabled) {
-                    _this._showMultiSelectOptions();
+                if (that.multiSelectState.enabled) {
+                    that._showMultiSelectOptions();
                 }
             });
             $.subscribe(Commands.TREE_NODE_MULTISELECTED, function (s, node) {
@@ -4920,6 +5176,12 @@ define('modules/uv-shared-module/BaseProvider',["require", "exports", "../../Boo
         BaseProvider.prototype.getStartCanvasIndex = function () {
             return this.getCurrentSequence().getStartCanvasIndex();
         };
+        BaseProvider.prototype.getShareUrl = function () {
+            if (Utils.Documents.IsInIFrame()) {
+                return parent.document.location.href;
+            }
+            return document.location.href;
+        };
         BaseProvider.prototype.addTimestamp = function (uri) {
             return uri + "?t=" + Utils.Dates.GetTimeStamp();
         };
@@ -4987,6 +5249,18 @@ define('modules/uv-shared-module/BaseProvider',["require", "exports", "../../Boo
                 result.push({
                     label: "logo",
                     value: '<img src="' + this.manifest.getLogo() + '"/>',
+                    isRootLevel: true
+                });
+            }
+            return result;
+        };
+        BaseProvider.prototype.getCanvasMetadata = function (canvas) {
+            var result = [];
+            var metadata = canvas.getMetadata();
+            if (metadata) {
+                result.push({
+                    label: "metadata",
+                    value: metadata,
                     isRootLevel: true
                 });
             }
@@ -6855,6 +7129,8 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
             });
             this.title = this.extension.provider.getTitle();
             this.createNavigationButtons();
+            this.hidePrevButton();
+            this.hideNextButton();
             // if firefox, hide rotation and prev/next until this is resolved
             //var browser = window.browserDetect.browser;
             //if (browser == 'Firefox') {
@@ -6868,8 +7144,6 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
             this.resize();
         };
         SeadragonCenterPanel.prototype.createNavigationButtons = function () {
-            if (!this.provider.isMultiCanvas())
-                return;
             this.$leftButton = $('<div class="paging btn prev"></div>');
             this.$leftButton.prop('title', this.content.previous);
             this.viewer.addControl(this.$leftButton[0], { anchor: OpenSeadragon.ControlAnchor.TOP_LEFT });
@@ -6917,27 +7191,41 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
         };
         SeadragonCenterPanel.prototype.positionPages = function () {
             var resources = this.provider.resources;
+            var x;
+            var y;
+            var page;
+            var pageBounds;
+            var nextPage;
+            var nextPagePos;
+            var topPage;
+            var topPageBounds;
+            var bottomPage;
+            var bottomPagePos;
+            var leftPage;
+            var leftPageBounds;
+            var rightPage;
+            var rightPagePos;
             // if there's more than one image, determine alignment strategy
             if (resources.length > 1) {
                 if (resources.length === 2) {
                     // recto verso
                     if (this.provider.isVerticallyAligned()) {
                         // vertical alignment
-                        var topPage = this.viewer.world.getItemAt(0);
-                        var topPageBounds = topPage.getBounds(true);
-                        var y = topPageBounds.y + topPageBounds.height;
-                        var bottomPage = this.viewer.world.getItemAt(1);
-                        var bottomPagePos = bottomPage.getBounds(true).getTopLeft();
+                        topPage = this.viewer.world.getItemAt(0);
+                        topPageBounds = topPage.getBounds(true);
+                        y = topPageBounds.y + topPageBounds.height;
+                        bottomPage = this.viewer.world.getItemAt(1);
+                        bottomPagePos = bottomPage.getBounds(true).getTopLeft();
                         bottomPagePos.y = y + this.config.options.pageGap;
                         bottomPage.setPosition(bottomPagePos, true);
                     }
                     else {
                         // horizontal alignment
-                        var leftPage = this.viewer.world.getItemAt(0);
-                        var leftPageBounds = leftPage.getBounds(true);
-                        var x = leftPageBounds.x + leftPageBounds.width;
-                        var rightPage = this.viewer.world.getItemAt(1);
-                        var rightPagePos = rightPage.getBounds(true).getTopLeft();
+                        leftPage = this.viewer.world.getItemAt(0);
+                        leftPageBounds = leftPage.getBounds(true);
+                        x = leftPageBounds.x + leftPageBounds.width;
+                        rightPage = this.viewer.world.getItemAt(1);
+                        rightPagePos = rightPage.getBounds(true).getTopLeft();
                         rightPagePos.x = x + this.config.options.pageGap;
                         rightPage.setPosition(rightPagePos, true);
                     }
@@ -6946,26 +7234,56 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
                     // scroll
                     if (this.provider.isVerticallyAligned()) {
                         // vertical alignment
-                        for (var i = 0; i < resources.length - 1; i++) {
-                            var page = this.viewer.world.getItemAt(i);
-                            var pageBounds = page.getBounds(true);
-                            var y = pageBounds.y + pageBounds.height;
-                            var nextPage = this.viewer.world.getItemAt(i + 1);
-                            var nextPagePos = nextPage.getBounds(true).getTopLeft();
-                            nextPagePos.y = y;
-                            nextPage.setPosition(nextPagePos, true);
+                        if (this.provider.isTopToBottom()) {
+                            // top to bottom
+                            for (var i = 0; i < resources.length - 1; i++) {
+                                page = this.viewer.world.getItemAt(i);
+                                pageBounds = page.getBounds(true);
+                                y = pageBounds.y + pageBounds.height;
+                                nextPage = this.viewer.world.getItemAt(i + 1);
+                                nextPagePos = nextPage.getBounds(true).getTopLeft();
+                                nextPagePos.y = y;
+                                nextPage.setPosition(nextPagePos, true);
+                            }
+                        }
+                        else {
+                            // bottom to top
+                            for (var i = resources.length; i > 0; i--) {
+                                page = this.viewer.world.getItemAt(i);
+                                pageBounds = page.getBounds(true);
+                                y = pageBounds.y - pageBounds.height;
+                                nextPage = this.viewer.world.getItemAt(i - 1);
+                                nextPagePos = nextPage.getBounds(true).getTopLeft();
+                                nextPagePos.y = y;
+                                nextPage.setPosition(nextPagePos, true);
+                            }
                         }
                     }
                     else {
                         // horizontal alignment
-                        for (var i = 0; i < resources.length - 1; i++) {
-                            var page = this.viewer.world.getItemAt(i);
-                            var pageBounds = page.getBounds(true);
-                            var x = pageBounds.x + pageBounds.width;
-                            var nextPage = this.viewer.world.getItemAt(i + 1);
-                            var nextPagePos = nextPage.getBounds(true).getTopLeft();
-                            nextPagePos.x = x;
-                            nextPage.setPosition(nextPagePos, true);
+                        if (this.provider.isLeftToRight()) {
+                            // left to right
+                            for (var i = 0; i < resources.length - 1; i++) {
+                                page = this.viewer.world.getItemAt(i);
+                                pageBounds = page.getBounds(true);
+                                x = pageBounds.x + pageBounds.width;
+                                nextPage = this.viewer.world.getItemAt(i + 1);
+                                nextPagePos = nextPage.getBounds(true).getTopLeft();
+                                nextPagePos.x = x;
+                                nextPage.setPosition(nextPagePos, true);
+                            }
+                        }
+                        else {
+                            // right to left
+                            for (var i = resources.length - 1; i > 0; i--) {
+                                page = this.viewer.world.getItemAt(i);
+                                pageBounds = page.getBounds(true);
+                                x = pageBounds.x - pageBounds.width;
+                                nextPage = this.viewer.world.getItemAt(i - 1);
+                                nextPagePos = nextPage.getBounds(true).getTopLeft();
+                                nextPagePos.x = x;
+                                nextPage.setPosition(nextPagePos, true);
+                            }
                         }
                     }
                 }
@@ -6997,11 +7315,9 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
                     this.goHome();
                 }
             }
-            if (this.provider.isContinuous()) {
-                this.hidePrevButton();
-                this.hideNextButton();
-            }
-            else if (this.provider.isMultiCanvas()) {
+            if (this.provider.isMultiCanvas() && !this.provider.isContinuous()) {
+                this.showPrevButton();
+                this.showNextButton();
                 $('.navigator').addClass('extraMargin');
                 if (!this.provider.isFirstCanvas()) {
                     this.enablePrevButton();
@@ -7151,6 +7467,7 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
             return newRects;
         };
         SeadragonCenterPanel.prototype.resize = function () {
+            var _this = this;
             _super.prototype.resize.call(this);
             this.$viewer.height(this.$content.height() - this.$viewer.verticalMargins());
             this.$viewer.width(this.$content.width() - this.$viewer.horizontalMargins());
@@ -7166,15 +7483,19 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
                 this.$leftButton.css('top', (this.$content.height() - this.$leftButton.height()) / 2);
                 this.$rightButton.css('top', (this.$content.height() - this.$rightButton.height()) / 2);
             }
-            // stretch navigator
-            if (this.provider.isContinuous()) {
-                if (this.provider.isHorizontallyAligned()) {
-                    this.$navigator.width(this.$viewer.width() - this.$viewer.rightMargin());
+            // stretch navigator, allowing time for OSD to resize
+            setTimeout(function () {
+                if (_this.provider.isContinuous()) {
+                    if (_this.provider.isHorizontallyAligned()) {
+                        var width = _this.$viewer.width() - _this.$viewer.rightMargin();
+                        console.log(width);
+                        _this.$navigator.width(width);
+                    }
+                    else {
+                        _this.$navigator.height(_this.$viewer.height());
+                    }
                 }
-                else {
-                    this.$navigator.height(this.$viewer.height());
-                }
-            }
+            }, 100);
         };
         SeadragonCenterPanel.prototype.setFocus = function () {
             var $canvas = $(this.viewer.canvas);
@@ -8973,9 +9294,6 @@ var Manifesto;
         ServiceProfile.prototype.autoComplete = function () {
             return new ServiceProfile(ServiceProfile.AUTOCOMPLETE.toString());
         };
-        ServiceProfile.prototype.clickThrough = function () {
-            return new ServiceProfile(ServiceProfile.CLICKTHROUGH.toString());
-        };
         ServiceProfile.prototype.iiif1ImageLevel1 = function () {
             return new ServiceProfile(ServiceProfile.IIIF1IMAGELEVEL1.toString());
         };
@@ -8993,6 +9311,12 @@ var Manifesto;
         };
         ServiceProfile.prototype.login = function () {
             return new ServiceProfile(ServiceProfile.LOGIN.toString());
+        };
+        ServiceProfile.prototype.clickThrough = function () {
+            return new ServiceProfile(ServiceProfile.CLICKTHROUGH.toString());
+        };
+        ServiceProfile.prototype.restricted = function () {
+            return new ServiceProfile(ServiceProfile.RESTRICTED.toString());
         };
         ServiceProfile.prototype.logout = function () {
             return new ServiceProfile(ServiceProfile.LOGOUT.toString());
@@ -9034,7 +9358,6 @@ var Manifesto;
             return new ServiceProfile(ServiceProfile.UIEXTENSIONS.toString());
         };
         ServiceProfile.AUTOCOMPLETE = new ServiceProfile("http://iiif.io/api/search/0/autocomplete");
-        ServiceProfile.CLICKTHROUGH = new ServiceProfile("http://wellcomelibrary.org/ld/iiif-ext/0/accept-terms-click-through");
         ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE0 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/compliance.html#level0");
         ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE1 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/compliance.html#level1");
         ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE2 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/compliance.html#level2");
@@ -9048,13 +9371,21 @@ var Manifesto;
         ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE1 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/1.1/conformance.html#level1");
         ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE2 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/1.1/conformance.html#level2");
         ServiceProfile.IIIF1IMAGELEVEL0 = new ServiceProfile("http://iiif.io/api/image/1/level0.json");
+        ServiceProfile.IIIF1IMAGELEVEL0PROFILE = new ServiceProfile("http://iiif.io/api/image/1/profiles/level0.json");
         ServiceProfile.IIIF1IMAGELEVEL1 = new ServiceProfile("http://iiif.io/api/image/1/level1.json");
+        ServiceProfile.IIIF1IMAGELEVEL1PROFILE = new ServiceProfile("http://iiif.io/api/image/1/profiles/level1.json");
         ServiceProfile.IIIF1IMAGELEVEL2 = new ServiceProfile("http://iiif.io/api/image/1/level2.json");
+        ServiceProfile.IIIF1IMAGELEVEL2PROFILE = new ServiceProfile("http://iiif.io/api/image/1/profiles/level2.json");
         ServiceProfile.IIIF2IMAGELEVEL0 = new ServiceProfile("http://iiif.io/api/image/2/level0.json");
+        ServiceProfile.IIIF2IMAGELEVEL0PROFILE = new ServiceProfile("http://iiif.io/api/image/2/profiles/level0.json");
         ServiceProfile.IIIF2IMAGELEVEL1 = new ServiceProfile("http://iiif.io/api/image/2/level1.json");
+        ServiceProfile.IIIF2IMAGELEVEL1PROFILE = new ServiceProfile("http://iiif.io/api/image/2/profiles/level1.json");
         ServiceProfile.IIIF2IMAGELEVEL2 = new ServiceProfile("http://iiif.io/api/image/2/level2.json");
+        ServiceProfile.IIIF2IMAGELEVEL2PROFILE = new ServiceProfile("http://iiif.io/api/image/2/profiles/level2.json");
         ServiceProfile.IXIF = new ServiceProfile("http://wellcomelibrary.org/ld/ixif/0/alpha.json");
         ServiceProfile.LOGIN = new ServiceProfile("http://iiif.io/api/auth/0/login");
+        ServiceProfile.CLICKTHROUGH = new ServiceProfile("http://iiif.io/api/auth/0/login/clickthrough");
+        ServiceProfile.RESTRICTED = new ServiceProfile("http://iiif.io/api/auth/0/login/restricted");
         ServiceProfile.LOGOUT = new ServiceProfile("http://iiif.io/api/auth/0/logout");
         ServiceProfile.OTHERMANIFESTATIONS = new ServiceProfile("http://iiif.io/api/otherManifestations.json");
         ServiceProfile.SEARCHWITHIN = new ServiceProfile("http://iiif.io/api/search/0/search");
@@ -9258,11 +9589,15 @@ var Manifesto;
                         profile === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE1.toString() ||
                         profile === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE2.toString() ||
                         profile === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1.toString() ||
-                        profile === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2.toString()) {
+                        profile === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1PROFILE.toString() ||
+                        profile === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2.toString() ||
+                        profile === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2PROFILE.toString()) {
                         uri = id + 'full/' + width + ',' + height + '/0/native.jpg';
                     }
                     else if (profile === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1.toString() ||
-                        profile === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString()) {
+                        profile === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1PROFILE.toString() ||
+                        profile === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString() ||
+                        profile === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2PROFILE.toString()) {
                         uri = id + 'full/' + width + ',' + height + '/0/default.jpg';
                     }
                 }
@@ -10117,7 +10452,7 @@ var Manifesto;
                 request.end();
             });
         };
-        Utils.loadExternalResource = function (resource, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
+        Utils.loadExternalResource = function (resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
             return new Promise(function (resolve, reject) {
                 if (options && options.pessimisticAccessControl) {
                     // pessimistic: access control cookies may have been deleted.
@@ -10129,19 +10464,22 @@ var Manifesto;
                             if (resource.clickThroughService) {
                                 resolve(clickThrough(resource));
                             }
+                            else if (resource.restrictedService) {
+                                resolve(restricted(resource));
+                            }
                             else {
                                 login(resource).then(function () {
-                                    getAccessToken(resource).then(function (token) {
+                                    getAccessToken(resource, true).then(function (token) {
                                         resource.getData(token).then(function () {
                                             resolve(handleResourceResponse(resource));
-                                        })["catch"](function (error) {
-                                            reject(error);
+                                        })["catch"](function (message) {
+                                            reject(Utils.createInternalServerError(message));
                                         });
-                                    })["catch"](function (error) {
-                                        reject(error);
+                                    })["catch"](function (message) {
+                                        reject(Utils.createInternalServerError(message));
                                     });
-                                })["catch"](function (error) {
-                                    reject(error);
+                                })["catch"](function (message) {
+                                    reject(Utils.createInternalServerError(message));
                                 });
                             }
                         }
@@ -10149,8 +10487,8 @@ var Manifesto;
                             // this info.json isn't access controlled, therefore no need to request an access token.
                             resolve(resource);
                         }
-                    })["catch"](function (error) {
-                        reject(error);
+                    })["catch"](function (message) {
+                        reject(Utils.createInternalServerError(message));
                     });
                 }
                 else {
@@ -10170,33 +10508,53 @@ var Manifesto;
                                 else {
                                     // otherwise, load the resource data to determine the correct access control services.
                                     // if access controlled, do login.
-                                    Utils.authorize(resource, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken).then(function () {
+                                    Utils.authorize(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken).then(function () {
                                         resolve(handleResourceResponse(resource));
                                     })["catch"](function (error) {
-                                        reject(error);
+                                        if (resource.restrictedService) {
+                                            reject(Utils.createRestrictedError());
+                                        }
+                                        else {
+                                            reject(Utils.createAuthorizationFailedError());
+                                        }
                                     });
                                 }
                             })["catch"](function (error) {
-                                reject(error);
+                                reject(Utils.createAuthorizationFailedError());
                             });
                         }
                         else {
-                            Utils.authorize(resource, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken).then(function () {
+                            Utils.authorize(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken).then(function () {
                                 resolve(handleResourceResponse(resource));
                             })["catch"](function (error) {
-                                reject(error);
+                                reject(Utils.createAuthorizationFailedError());
                             });
                         }
                     })["catch"](function (error) {
-                        reject(error);
+                        reject(Utils.createAuthorizationFailedError());
                     });
                 }
             });
         };
-        Utils.loadExternalResources = function (resources, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
+        Utils.createError = function (name, message) {
+            var error = new Error();
+            error.message = message;
+            error.name = name;
+            return error;
+        };
+        Utils.createAuthorizationFailedError = function () {
+            return Utils.createError(manifesto.StatusCodes.AUTHORIZATION_FAILED.toString(), "Authorization failed");
+        };
+        Utils.createRestrictedError = function () {
+            return Utils.createError(manifesto.StatusCodes.RESTRICTED.toString(), "Restricted");
+        };
+        Utils.createInternalServerError = function (message) {
+            return Utils.createError(manifesto.StatusCodes.INTERNAL_SERVER_ERROR.toString(), message);
+        };
+        Utils.loadExternalResources = function (resources, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
             return new Promise(function (resolve, reject) {
                 var promises = _map(resources, function (resource) {
-                    return Utils.loadExternalResource(resource, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options);
+                    return Utils.loadExternalResource(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options);
                 });
                 Promise.all(promises)
                     .then(function () {
@@ -10206,7 +10564,7 @@ var Manifesto;
                 });
             });
         };
-        Utils.authorize = function (resource, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken) {
+        Utils.authorize = function (resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken) {
             return new Promise(function (resolve, reject) {
                 resource.getData().then(function () {
                     if (resource.isAccessControlled()) {
@@ -10214,58 +10572,47 @@ var Manifesto;
                             if (storedAccessToken) {
                                 // try using the stored access token
                                 resource.getData(storedAccessToken).then(function () {
-                                    resolve(resource);
-                                })["catch"](function (error) {
-                                    reject(error);
+                                    if (resource.status === HTTPStatusCode.OK) {
+                                        resolve(resource); // happy path ended
+                                    }
+                                    else {
+                                        // the stored token is no good for this resource
+                                        Utils.showAuthInteraction(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, resolve, reject);
+                                    }
+                                })["catch"](function (message) {
+                                    reject(Utils.createInternalServerError(message));
                                 });
                             }
                             else {
-                                if (resource.status === HTTPStatusCode.MOVED_TEMPORARILY && !resource.isResponseHandled) {
-                                    // if the resource was redirected to a degraded version
-                                    // and the response hasn't been handled yet.
-                                    // if the client wishes to trigger a login, set resource.isResponseHandled to true
-                                    // and call loadExternalResources() again passing the resource.
-                                    resolve(resource);
-                                }
-                                else if (resource.clickThroughService && !resource.isResponseHandled) {
-                                    // if the resource has a click through service, use that.
-                                    clickThrough(resource).then(function () {
-                                        getAccessToken(resource).then(function (accessToken) {
-                                            storeAccessToken(resource, accessToken, tokenStorageStrategy).then(function () {
-                                                resource.getData(accessToken).then(function () {
+                                // There was no stored token, but the user might have a cookie that will grant a token
+                                getAccessToken(resource, false).then(function (accessToken) {
+                                    if (accessToken) {
+                                        storeAccessToken(resource, accessToken, tokenStorageStrategy).then(function () {
+                                            // try using the fresh access token
+                                            resource.getData(accessToken).then(function () {
+                                                if (resource.status === HTTPStatusCode.OK) {
                                                     resolve(resource);
-                                                })["catch"](function (error) {
-                                                    reject(error);
-                                                });
-                                            })["catch"](function (error) {
-                                                reject(error);
+                                                }
+                                                else {
+                                                    // User has a token, but it's not good enough
+                                                    Utils.showAuthInteraction(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, resolve, reject);
+                                                }
+                                            })["catch"](function (message) {
+                                                reject(Utils.createInternalServerError(message));
                                             });
-                                        })["catch"](function (error) {
-                                            reject(error);
+                                        })["catch"](function (message) {
+                                            // not able to store access token
+                                            reject(Utils.createInternalServerError(message));
                                         });
-                                    });
-                                }
-                                else {
-                                    // get an access token
-                                    login(resource).then(function () {
-                                        getAccessToken(resource).then(function (accessToken) {
-                                            storeAccessToken(resource, accessToken, tokenStorageStrategy).then(function () {
-                                                resource.getData(accessToken).then(function () {
-                                                    resolve(resource);
-                                                })["catch"](function (error) {
-                                                    reject(error);
-                                                });
-                                            })["catch"](function (error) {
-                                                reject(error);
-                                            });
-                                        })["catch"](function (error) {
-                                            reject(error);
-                                        });
-                                    });
-                                }
+                                    }
+                                    else {
+                                        // The user did not have a cookie that granted a token
+                                        Utils.showAuthInteraction(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, resolve, reject);
+                                    }
+                                });
                             }
-                        })["catch"](function (error) {
-                            reject(error);
+                        })["catch"](function (message) {
+                            reject(Utils.createInternalServerError(message));
                         });
                     }
                     else {
@@ -10275,6 +10622,55 @@ var Manifesto;
                 });
             });
         };
+        Utils.showAuthInteraction = function (resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, resolve, reject) {
+            if (resource.status === HTTPStatusCode.MOVED_TEMPORARILY && !resource.isResponseHandled) {
+                // if the resource was redirected to a degraded version
+                // and the response hasn't been handled yet.
+                // if the client wishes to trigger a login, set resource.isResponseHandled to true
+                // and call loadExternalResources() again passing the resource.
+                resolve(resource);
+            }
+            else if (resource.restrictedService) {
+                resolve(restricted(resource));
+            }
+            else if (resource.clickThroughService && !resource.isResponseHandled) {
+                // if the resource has a click through service, use that.
+                clickThrough(resource).then(function () {
+                    getAccessToken(resource, true).then(function (accessToken) {
+                        storeAccessToken(resource, accessToken, tokenStorageStrategy).then(function () {
+                            resource.getData(accessToken).then(function () {
+                                resolve(resource);
+                            })["catch"](function (message) {
+                                reject(Utils.createInternalServerError(message));
+                            });
+                        })["catch"](function (message) {
+                            reject(Utils.createInternalServerError(message));
+                        });
+                    })["catch"](function (message) {
+                        reject(Utils.createInternalServerError(message));
+                    });
+                });
+            }
+            else {
+                // get an access token
+                login(resource).then(function () {
+                    getAccessToken(resource, true).then(function (accessToken) {
+                        storeAccessToken(resource, accessToken, tokenStorageStrategy).then(function () {
+                            resource.getData(accessToken).then(function () {
+                                resolve(resource);
+                            })["catch"](function (message) {
+                                reject(Utils.createInternalServerError(message));
+                            });
+                        })["catch"](function (message) {
+                            reject(Utils.createInternalServerError(message));
+                        });
+                    })["catch"](function (message) {
+                        reject(Utils.createInternalServerError(message));
+                    });
+                });
+            }
+        };
+        ;
         Utils.getService = function (resource, profile) {
             var services = this.getServices(resource);
             // coerce profile to string
@@ -10346,6 +10742,12 @@ global.manifesto = module.exports = {
     TreeNodeType: new Manifesto.TreeNodeType(),
     ViewingDirection: new Manifesto.ViewingDirection(),
     ViewingHint: new Manifesto.ViewingHint(),
+    StatusCodes: {
+        AUTHORIZATION_FAILED: 1,
+        FORBIDDEN: 2,
+        INTERNAL_SERVER_ERROR: 3,
+        RESTRICTED: 4
+    },
     create: function (manifest, options) {
         return Manifesto.Deserialiser.parse(manifest, options);
     },
@@ -10370,11 +10772,17 @@ global.manifesto = module.exports = {
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE1.toString() ||
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE2.toString() ||
             profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL0.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL0PROFILE.toString() ||
             profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1PROFILE.toString() ||
             profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2PROFILE.toString() ||
             profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL0.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL0PROFILE.toString() ||
             profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1.toString() ||
-            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString()) {
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1PROFILE.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2PROFILE.toString()) {
             return true;
         }
         return false;
@@ -10385,7 +10793,9 @@ global.manifesto = module.exports = {
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE0.toString() ||
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE0.toString() ||
             profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL0.toString() ||
-            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL0.toString()) {
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL0PROFILE.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL0.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL0PROFILE.toString()) {
             return true;
         }
         return false;
@@ -10396,7 +10806,9 @@ global.manifesto = module.exports = {
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE1.toString() ||
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE1.toString() ||
             profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1.toString() ||
-            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1.toString()) {
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1PROFILE.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1PROFILE.toString()) {
             return true;
         }
         return false;
@@ -10407,15 +10819,17 @@ global.manifesto = module.exports = {
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE2.toString() ||
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE2.toString() ||
             profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2.toString() ||
-            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString()) {
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2PROFILE.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2PROFILE.toString()) {
             return true;
         }
         return false;
     },
     // todo: create hasServiceDescriptor
     // based on @profile and @type (or lack of) can the resource describe associated services?
-    loadExternalResources: function (resources, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
-        return Manifesto.Utils.loadExternalResources(resources, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options);
+    loadExternalResources: function (resources, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
+        return Manifesto.Utils.loadExternalResources(resources, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options);
     },
     loadManifest: function (uri) {
         return Manifesto.Utils.loadResource(uri);
