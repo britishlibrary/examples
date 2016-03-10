@@ -4,6 +4,7 @@ define('modules/uv-shared-module/BaseCommands',["require", "exports"], function 
         }
         Commands.namespace = 'uv.';
         Commands.ACCEPT_TERMS = Commands.namespace + 'onAcceptTerms';
+        Commands.AUTHORIZATION_FAILED = Commands.namespace + 'onAuthorizationFailed';
         Commands.AUTHORIZATION_OCCURRED = Commands.namespace + 'onAuthorizationOccurred';
         Commands.BOOKMARK = Commands.namespace + 'onBookmark';
         Commands.CANVAS_INDEX_CHANGE_FAILED = Commands.namespace + 'onCanvasIndexChangeFailed';
@@ -19,8 +20,9 @@ define('modules/uv-shared-module/BaseCommands',["require", "exports"], function 
         Commands.END = Commands.namespace + 'onEnd';
         Commands.ESCAPE = Commands.namespace + 'onEscape';
         Commands.EXTERNAL_LINK_CLICKED = Commands.namespace + 'onExternalLinkClicked';
+        Commands.FORBIDDEN = Commands.namespace + 'onForbidden';
+        Commands.FEEDBACK = Commands.namespace + 'onFeedback';
         Commands.PARENT_EXIT_FULLSCREEN = Commands.namespace + 'onParentExitFullScreen';
-        Commands.HIDE_CLICKTHROUGH_DIALOGUE = Commands.namespace + 'onHideClickthroughDialogue';
         Commands.HIDE_DOWNLOAD_DIALOGUE = Commands.namespace + 'onHideDownloadDialogue';
         Commands.HIDE_EMBED_DIALOGUE = Commands.namespace + 'onHideEmbedDialogue';
         Commands.HIDE_EXTERNALCONTENT_DIALOGUE = Commands.namespace + 'onHideExternalContentDialogue';
@@ -28,6 +30,8 @@ define('modules/uv-shared-module/BaseCommands',["require", "exports"], function 
         Commands.HIDE_HELP_DIALOGUE = Commands.namespace + 'onHideHelpDialogue';
         Commands.HIDE_INFORMATION = Commands.namespace + 'onHideInformation';
         Commands.HIDE_LOGIN_DIALOGUE = Commands.namespace + 'onHideLoginDialogue';
+        Commands.HIDE_CLICKTHROUGH_DIALOGUE = Commands.namespace + 'onHideClickthroughDialogue';
+        Commands.HIDE_RESTRICTED_DIALOGUE = Commands.namespace + 'onHideRestrictedDialogue';
         Commands.HIDE_OVERLAY = Commands.namespace + 'onHideOverlay';
         Commands.HIDE_SETTINGS_DIALOGUE = Commands.namespace + 'onHideSettingsDialogue';
         Commands.HOME = Commands.namespace + 'onHome';
@@ -37,6 +41,7 @@ define('modules/uv-shared-module/BaseCommands',["require", "exports"], function 
         Commands.LEFTPANEL_EXPAND_FULL_FINISH = Commands.namespace + 'onLeftPanelExpandFullFinish';
         Commands.LEFTPANEL_EXPAND_FULL_START = Commands.namespace + 'onLeftPanelExpandFullStart';
         Commands.LOAD = Commands.namespace + 'onLoad';
+        Commands.LOAD_FAILED = Commands.namespace + 'onLoadFailed';
         Commands.MINUS = Commands.namespace + 'onMinus';
         Commands.NOT_FOUND = Commands.namespace + 'onNotFound';
         Commands.OPEN = Commands.namespace + 'onOpen';
@@ -51,6 +56,7 @@ define('modules/uv-shared-module/BaseCommands',["require", "exports"], function 
         Commands.RESIZE = Commands.namespace + 'onResize';
         Commands.RESOURCE_DEGRADED = Commands.namespace + 'onResourceDegraded';
         Commands.RETURN = Commands.namespace + 'onReturn';
+        Commands.RETRY = Commands.namespace + 'onRetry';
         Commands.RIGHT_ARROW = Commands.namespace + 'onRightArrow';
         Commands.RIGHTPANEL_COLLAPSE_FULL_FINISH = Commands.namespace + 'onRightPanelCollapseFullFinish';
         Commands.RIGHTPANEL_COLLAPSE_FULL_START = Commands.namespace + 'onRightPanelCollapseFullStart';
@@ -58,7 +64,6 @@ define('modules/uv-shared-module/BaseCommands',["require", "exports"], function 
         Commands.RIGHTPANEL_EXPAND_FULL_START = Commands.namespace + 'onRightPanelExpandFullStart';
         Commands.SEQUENCE_INDEX_CHANGED = Commands.namespace + 'onSequenceIndexChanged';
         Commands.SETTINGS_CHANGED = Commands.namespace + 'onSettingsChanged';
-        Commands.SHOW_CLICKTHROUGH_DIALOGUE = Commands.namespace + 'onShowClickThroughDialogue';
         Commands.SHOW_DOWNLOAD_DIALOGUE = Commands.namespace + 'onShowDownloadDialogue';
         Commands.SHOW_EMBED_DIALOGUE = Commands.namespace + 'onShowEmbedDialogue';
         Commands.SHOW_EXTERNALCONTENT_DIALOGUE = Commands.namespace + 'onShowExternalContentDialogue';
@@ -66,6 +71,8 @@ define('modules/uv-shared-module/BaseCommands',["require", "exports"], function 
         Commands.SHOW_HELP_DIALOGUE = Commands.namespace + 'onShowHelpDialogue';
         Commands.SHOW_INFORMATION = Commands.namespace + 'onShowInformation';
         Commands.SHOW_LOGIN_DIALOGUE = Commands.namespace + 'onShowLoginDialogue';
+        Commands.SHOW_CLICKTHROUGH_DIALOGUE = Commands.namespace + 'onShowClickThroughDialogue';
+        Commands.SHOW_RESTRICTED_DIALOGUE = Commands.namespace + 'onShowRestrictedDialogue';
         Commands.SHOW_OVERLAY = Commands.namespace + 'onShowOverlay';
         Commands.SHOW_SETTINGS_DIALOGUE = Commands.namespace + 'onShowSettingsDialogue';
         Commands.THUMB_SELECTED = Commands.namespace + 'onThumbSelected';
@@ -581,42 +588,31 @@ define('modules/uv-dialogues-module/ClickThroughDialogue',["require", "exports",
             <div>\
                 <p class="message scroll"></p>\
                 <div class="buttons">\
-                    <a class="viewTerms" href="#"></a>\
                     <a class="acceptTerms btn btn-primary" href="#" target="_parent"></a>\
                 </div>\
             </div>');
             this.$message = this.$content.find(".message");
-            this.$message.targetBlank();
-            this.$viewTermsButton = this.$content.find(".viewTerms");
-            this.$viewTermsButton.text(this.content.viewTerms);
             this.$acceptTermsButton = this.$content.find(".acceptTerms");
+            // TODO: get from config this.$acceptTermsButton.text(this.content.acceptTerms); // figure out config
+            this.$acceptTermsButton.text("Accept Terms and Open");
             this.$element.hide();
-            this.$viewTermsButton.on('click', function (e) {
-                e.preventDefault();
-                _this.$message.empty();
-                _this.$message.addClass('loading');
-                _this.$message.load(_this.resource.clickThroughService.getProperty('fullTermsSimple'), function () {
-                    _this.$message.removeClass('loading');
-                    _this.$message.targetBlank();
-                    _this.$viewTermsButton.hide();
-                });
-                $.publish(BaseCommands.VIEW_FULL_TERMS);
-            });
             this.$acceptTermsButton.on('click', function (e) {
                 e.preventDefault();
                 _this.close();
                 $.publish(BaseCommands.ACCEPT_TERMS);
                 if (_this.acceptCallback)
                     _this.acceptCallback();
-                //var redirectUrl = this.service.id + escape(parent.document.URL);
-                //this.extension.redirect(redirectUrl);
             });
         };
         ClickThroughDialogue.prototype.open = function () {
             _super.prototype.open.call(this);
             this.$title.text(this.resource.clickThroughService.getProperty('label'));
             this.$message.html(this.resource.clickThroughService.getProperty('description'));
-            this.$acceptTermsButton.text(this.resource.clickThroughService.getProperty('actionLabel'));
+            this.$message.targetBlank();
+            this.$message.find('a').on('click', function () {
+                var url = $(this).attr('href');
+                $.publish(BaseCommands.EXTERNAL_LINK_CLICKED, [url]);
+            });
             this.resize();
         };
         ClickThroughDialogue.prototype.resize = function () {
@@ -627,23 +623,108 @@ define('modules/uv-dialogues-module/ClickThroughDialogue',["require", "exports",
     return ClickThroughDialogue;
 });
 
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+define('modules/uv-dialogues-module/RestrictedDialogue',["require", "exports", "../uv-shared-module/BaseCommands", "../uv-shared-module/Dialogue"], function (require, exports, BaseCommands, Dialogue) {
+    var RestrictedDialogue = (function (_super) {
+        __extends(RestrictedDialogue, _super);
+        function RestrictedDialogue($element) {
+            _super.call(this, $element);
+        }
+        RestrictedDialogue.prototype.create = function () {
+            var _this = this;
+            this.setConfig('restrictedDialogue');
+            _super.prototype.create.call(this);
+            this.openCommand = BaseCommands.SHOW_RESTRICTED_DIALOGUE;
+            this.closeCommand = BaseCommands.HIDE_RESTRICTED_DIALOGUE;
+            $.subscribe(this.openCommand, function (s, e) {
+                _this.acceptCallback = e.acceptCallback;
+                _this.options = e.options;
+                _this.resource = e.resource;
+                _this.open();
+            });
+            $.subscribe(this.closeCommand, function (e) {
+                _this.close();
+            });
+            this.$title = $('<h1></h1>');
+            this.$content.append(this.$title);
+            this.$content.append('\
+            <div>\
+                <p class="message scroll"></p>\
+                <div class="buttons">\
+                    <a class="cancel btn btn-primary" href="#" target="_parent"></a>\
+                </div>\
+            </div>');
+            this.$message = this.$content.find('.message');
+            this.$message.targetBlank();
+            // todo: revisit?
+            //this.$nextVisibleButton = this.$content.find('.nextvisible');
+            //this.$nextVisibleButton.text(this.content.nextVisibleItem);
+            this.$cancelButton = this.$content.find('.cancel');
+            this.$cancelButton.text(this.content.cancel);
+            this.$element.hide();
+            this.$cancelButton.on('click', function (e) {
+                e.preventDefault();
+                _this.close();
+            });
+        };
+        RestrictedDialogue.prototype.open = function () {
+            _super.prototype.open.call(this);
+            this.$title.text(this.resource.restrictedService.getProperty('label'));
+            var message = this.resource.restrictedService.getProperty('description');
+            this.$message.html(message);
+            this.$message.targetBlank();
+            this.$message.find('a').on('click', function () {
+                var url = $(this).attr('href');
+                $.publish(BaseCommands.EXTERNAL_LINK_CLICKED, [url]);
+            });
+            this.resize();
+        };
+        RestrictedDialogue.prototype.close = function () {
+            _super.prototype.close.call(this);
+            if (this.acceptCallback) {
+                this.acceptCallback();
+            }
+        };
+        RestrictedDialogue.prototype.resize = function () {
+            _super.prototype.resize.call(this);
+        };
+        return RestrictedDialogue;
+    })(Dialogue);
+    return RestrictedDialogue;
+});
+
 define('modules/uv-shared-module/ExternalResource',["require", "exports"], function (require, exports) {
     var ExternalResource = (function () {
         function ExternalResource(resource, dataUriFunc) {
             this.isResponseHandled = false;
             this.dataUri = dataUriFunc(resource);
             this._parseAuthServices(resource);
+            //this.profile = (<Manifesto.IService>resource).getProfile();
         }
         ExternalResource.prototype._parseAuthServices = function (resource) {
             this.clickThroughService = manifesto.getService(resource, manifesto.ServiceProfile.clickThrough().toString());
             this.loginService = manifesto.getService(resource, manifesto.ServiceProfile.login().toString());
-            if (this.loginService) {
+            this.restrictedService = manifesto.getService(resource, manifesto.ServiceProfile.restricted().toString());
+            // todo: create this.preferredService?
+            if (this.clickThroughService) {
+                this.logoutService = this.clickThroughService.getService(manifesto.ServiceProfile.logout().toString());
+                this.tokenService = this.clickThroughService.getService(manifesto.ServiceProfile.token().toString());
+            }
+            else if (this.loginService) {
                 this.logoutService = this.loginService.getService(manifesto.ServiceProfile.logout().toString());
                 this.tokenService = this.loginService.getService(manifesto.ServiceProfile.token().toString());
             }
+            else if (this.restrictedService) {
+                this.logoutService = this.restrictedService.getService(manifesto.ServiceProfile.logout().toString());
+                this.tokenService = this.restrictedService.getService(manifesto.ServiceProfile.token().toString());
+            }
         };
         ExternalResource.prototype.isAccessControlled = function () {
-            if (this.clickThroughService || this.loginService) {
+            if (this.clickThroughService || this.loginService || this.restrictedService) {
                 return true;
             }
             return false;
@@ -758,9 +839,10 @@ define('modules/uv-dialogues-module/LoginDialogue',["require", "exports", "../uv
             _super.prototype.create.call(this);
             this.openCommand = BaseCommands.SHOW_LOGIN_DIALOGUE;
             this.closeCommand = BaseCommands.HIDE_LOGIN_DIALOGUE;
-            $.subscribe(this.openCommand, function (e, params) {
-                _this.acceptCallback = params.acceptCallback;
-                _this.resource = params.resource;
+            $.subscribe(this.openCommand, function (s, e) {
+                _this.acceptCallback = e.acceptCallback;
+                _this.options = e.options;
+                _this.resource = e.resource;
                 _this.open();
             });
             $.subscribe(this.closeCommand, function (e) {
@@ -773,11 +855,14 @@ define('modules/uv-dialogues-module/LoginDialogue',["require", "exports", "../uv
                 <p class="message scroll"></p>\
                 <div class="buttons">\
                     <a class="login btn btn-primary" href="#" target="_parent"></a>\
+                    <a class="cancel btn btn-primary" href="#"></a>\
                 </div>\
             </div>');
             this.$message = this.$content.find('.message');
             this.$loginButton = this.$content.find('.login');
             this.$loginButton.text(this.content.login);
+            this.$cancelButton = this.$content.find('.cancel');
+            this.$cancelButton.text(this.content.cancel);
             this.$element.hide();
             this.$loginButton.on('click', function (e) {
                 e.preventDefault();
@@ -785,16 +870,30 @@ define('modules/uv-dialogues-module/LoginDialogue',["require", "exports", "../uv
                 if (_this.acceptCallback)
                     _this.acceptCallback();
             });
+            this.$cancelButton.on('click', function (e) {
+                e.preventDefault();
+                _this.close();
+            });
         };
         LoginDialogue.prototype.open = function () {
             _super.prototype.open.call(this);
             this.$title.text(this.resource.loginService.getProperty('label'));
-            this.$message.html(this.resource.loginService.getProperty('description'));
+            var message = this.resource.loginService.getProperty('description');
+            if (this.options.warningMessage) {
+                message = '<span class="warning">' + this.provider.config.content[this.options.warningMessage] + '</span><span class="description">' + message + '</span>';
+            }
+            this.$message.html(message);
             this.$message.targetBlank();
             this.$message.find('a').on('click', function () {
                 var url = $(this).attr('href');
                 $.publish(BaseCommands.EXTERNAL_LINK_CLICKED, [url]);
             });
+            if (this.options.showCancelButton) {
+                this.$cancelButton.show();
+            }
+            else {
+                this.$cancelButton.hide();
+            }
             this.resize();
         };
         LoginDialogue.prototype.resize = function () {
@@ -927,7 +1026,17 @@ define('modules/uv-shared-module/Shell',["require", "exports", "./BaseCommands",
     return Shell;
 });
 
-define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCommands", "../../BootstrapParams", "../../modules/uv-dialogues-module/ClickThroughDialogue", "./ExternalResource", "./InformationArgs", "./InformationType", "../../modules/uv-dialogues-module/LoginDialogue", "../../Params", "./Shell"], function (require, exports, BaseCommands, BootstrapParams, ClickThroughDialogue, ExternalResource, InformationArgs, InformationType, LoginDialogue, Params, Shell) {
+define('modules/uv-shared-module/LoginWarningMessages',["require", "exports"], function (require, exports) {
+    var LoginWarningMessages = (function () {
+        function LoginWarningMessages() {
+        }
+        LoginWarningMessages.FORBIDDEN = "forbiddenResourceMessage";
+        return LoginWarningMessages;
+    })();
+    return LoginWarningMessages;
+});
+
+define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCommands", "../../BootstrapParams", "../../modules/uv-dialogues-module/ClickThroughDialogue", "../../modules/uv-dialogues-module/RestrictedDialogue", "./ExternalResource", "./InformationArgs", "./InformationType", "../../modules/uv-dialogues-module/LoginDialogue", "../../Params", "./Shell", "./LoginWarningMessages"], function (require, exports, BaseCommands, BootstrapParams, ClickThroughDialogue, RestrictedDialogue, ExternalResource, InformationArgs, InformationType, LoginDialogue, Params, Shell, LoginWarningMessages) {
     var BaseExtension = (function () {
         function BaseExtension(bootstrapper) {
             this.shifted = false;
@@ -1051,6 +1160,10 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
             $.subscribe(BaseCommands.ACCEPT_TERMS, function () {
                 _this.triggerSocket(BaseCommands.ACCEPT_TERMS);
             });
+            $.subscribe(BaseCommands.AUTHORIZATION_FAILED, function () {
+                _this.triggerSocket(BaseCommands.AUTHORIZATION_FAILED);
+                _this.showMessage(_this.provider.config.content.authorisationFailedMessage);
+            });
             $.subscribe(BaseCommands.AUTHORIZATION_OCCURRED, function () {
                 _this.triggerSocket(BaseCommands.AUTHORIZATION_OCCURRED);
             });
@@ -1094,6 +1207,13 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
                 if (_this.isFullScreen() && !_this.isOverlayActive()) {
                     $.publish(BaseCommands.TOGGLE_FULLSCREEN);
                 }
+            });
+            $.subscribe(BaseCommands.FEEDBACK, function () {
+                _this.feedback();
+            });
+            $.subscribe(BaseCommands.FORBIDDEN, function () {
+                _this.triggerSocket(BaseCommands.FORBIDDEN);
+                $.publish(BaseCommands.OPEN_EXTERNAL_RESOURCE);
             });
             $.subscribe(BaseCommands.HIDE_DOWNLOAD_DIALOGUE, function () {
                 _this.triggerSocket(BaseCommands.HIDE_DOWNLOAD_DIALOGUE);
@@ -1196,9 +1316,6 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
             $.subscribe(BaseCommands.SETTINGS_CHANGED, function (e, args) {
                 _this.triggerSocket(BaseCommands.SETTINGS_CHANGED, args);
             });
-            $.subscribe(BaseCommands.SHOW_CLICKTHROUGH_DIALOGUE, function () {
-                _this.triggerSocket(BaseCommands.SHOW_CLICKTHROUGH_DIALOGUE);
-            });
             $.subscribe(BaseCommands.SHOW_DOWNLOAD_DIALOGUE, function () {
                 _this.triggerSocket(BaseCommands.SHOW_DOWNLOAD_DIALOGUE);
             });
@@ -1219,6 +1336,12 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
             });
             $.subscribe(BaseCommands.SHOW_LOGIN_DIALOGUE, function () {
                 _this.triggerSocket(BaseCommands.SHOW_LOGIN_DIALOGUE);
+            });
+            $.subscribe(BaseCommands.SHOW_CLICKTHROUGH_DIALOGUE, function () {
+                _this.triggerSocket(BaseCommands.SHOW_CLICKTHROUGH_DIALOGUE);
+            });
+            $.subscribe(BaseCommands.SHOW_RESTRICTED_DIALOGUE, function () {
+                _this.triggerSocket(BaseCommands.SHOW_RESTRICTED_DIALOGUE);
             });
             $.subscribe(BaseCommands.SHOW_OVERLAY, function () {
                 _this.triggerSocket(BaseCommands.SHOW_OVERLAY);
@@ -1267,6 +1390,9 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
             this.$clickThroughDialogue = $('<div class="overlay clickthrough"></div>');
             Shell.$overlays.append(this.$clickThroughDialogue);
             this.clickThroughDialogue = new ClickThroughDialogue(this.$clickThroughDialogue);
+            this.$restrictedDialogue = $('<div class="overlay login"></div>');
+            Shell.$overlays.append(this.$restrictedDialogue);
+            this.restrictedDialogue = new RestrictedDialogue(this.$restrictedDialogue);
             this.$loginDialogue = $('<div class="overlay login"></div>');
             Shell.$overlays.append(this.$loginDialogue);
             this.loginDialogue = new LoginDialogue(this.$loginDialogue);
@@ -1403,13 +1529,25 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
             });
             var storageStrategy = this.provider.config.options.tokenStorage;
             return new Promise(function (resolve) {
-                manifesto.loadExternalResources(resourcesToLoad, storageStrategy, _this.clickThrough, _this.login, _this.getAccessToken, _this.storeAccessToken, _this.getStoredAccessToken, _this.handleExternalResourceResponse).then(function (r) {
+                manifesto.loadExternalResources(resourcesToLoad, storageStrategy, _this.clickThrough, _this.restricted, _this.login, _this.getAccessToken, _this.storeAccessToken, _this.getStoredAccessToken, _this.handleExternalResourceResponse).then(function (r) {
                     _this.provider.resources = _.map(r, function (resource) {
                         return _.toPlainObject(resource.data);
                     });
                     resolve(_this.provider.resources);
-                })['catch'](function (errorMessage) {
-                    _this.showMessage(errorMessage);
+                })['catch'](function (error) {
+                    switch (error.name) {
+                        case manifesto.StatusCodes.AUTHORIZATION_FAILED.toString():
+                            $.publish(BaseCommands.AUTHORIZATION_FAILED);
+                            break;
+                        case manifesto.StatusCodes.FORBIDDEN.toString():
+                            $.publish(BaseCommands.FORBIDDEN);
+                            break;
+                        case manifesto.StatusCodes.RESTRICTED.toString():
+                            // do nothing
+                            break;
+                        default:
+                            _this.showMessage(error.message || error);
+                    }
                 });
             });
         };
@@ -1483,8 +1621,14 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
             return this.bootstrapper.isFullScreen;
         };
         BaseExtension.prototype.isLeftPanelEnabled = function () {
-            return Utils.Bools.GetBool(this.provider.config.options.leftPanelEnabled, true)
-                && this.provider.isMultiCanvas();
+            if (Utils.Bools.GetBool(this.provider.config.options.leftPanelEnabled, true)) {
+                if (this.provider.isMultiCanvas()) {
+                    if (this.provider.getViewingHint().toString() !== manifesto.ViewingHint.continuous().toString()) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         };
         BaseExtension.prototype.isRightPanelEnabled = function () {
             return Utils.Bools.GetBool(this.provider.config.options.rightPanelEnabled, true);
@@ -1494,6 +1638,9 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
         };
         BaseExtension.prototype.bookmark = function () {
             // override for each extension
+        };
+        BaseExtension.prototype.feedback = function () {
+            this.triggerSocket(BaseCommands.FEEDBACK, new BootstrapParams());
         };
         BaseExtension.prototype.getBookmarkUri = function () {
             var absUri = parent.document.URL;
@@ -1522,8 +1669,24 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
                     }]);
             });
         };
+        BaseExtension.prototype.restricted = function (resource) {
+            return new Promise(function (resolve, reject) {
+                $.publish(BaseCommands.SHOW_RESTRICTED_DIALOGUE, [{
+                        resource: resource,
+                        acceptCallback: function () {
+                            $.publish(BaseCommands.LOAD_FAILED);
+                            reject(resource);
+                        }
+                    }]);
+            });
+        };
         BaseExtension.prototype.login = function (resource) {
             return new Promise(function (resolve) {
+                var options = {};
+                if (resource.status === HTTPStatusCode.FORBIDDEN) {
+                    options.warningMessage = LoginWarningMessages.FORBIDDEN;
+                    options.showCancelButton = true;
+                }
                 $.publish(BaseCommands.SHOW_LOGIN_DIALOGUE, [{
                         resource: resource,
                         acceptCallback: function () {
@@ -1535,21 +1698,32 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
                                     resolve();
                                 }
                             }, 500);
-                        }
+                        },
+                        options: options
                     }]);
             });
         };
-        BaseExtension.prototype.getAccessToken = function (resource) {
+        BaseExtension.prototype.getAccessToken = function (resource, rejectOnError) {
             return new Promise(function (resolve, reject) {
                 $.getJSON(resource.tokenService.id + "?callback=?", function (token) {
                     if (token.error) {
-                        reject(token.errorDescription);
+                        if (rejectOnError) {
+                            reject(token.errorDescription);
+                        }
+                        else {
+                            resolve(null);
+                        }
                     }
                     else {
                         resolve(token);
                     }
                 }).fail(function (error) {
-                    reject(error);
+                    if (rejectOnError) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(null);
+                    }
                 });
             });
         };
@@ -1561,11 +1735,16 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
         };
         BaseExtension.prototype.getStoredAccessToken = function (resource, storageStrategy) {
             return new Promise(function (resolve, reject) {
-                var foundToken;
+                var foundItems = [];
+                var item;
+                // try to match on the tokenService, if the resource has one:
+                if (resource.tokenService) {
+                    item = Utils.Storage.get(resource.tokenService.id, new Utils.StorageType(storageStrategy));
+                }
                 // first try an exact match of the url
-                var item = Utils.Storage.get(resource.dataUri, new Utils.StorageType(storageStrategy));
+                //var item: storage.StorageItem = Utils.Storage.get(resource.dataUri, new Utils.StorageType(storageStrategy));
                 if (item) {
-                    foundToken = item.value;
+                    foundItems.push(item);
                 }
                 else {
                     // find an access token for the domain
@@ -1574,9 +1753,17 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
                     for (var i = 0; i < items.length; i++) {
                         item = items[i];
                         if (item.key.contains(domain)) {
-                            foundToken = item.value;
+                            foundItems.push(item);
                         }
                     }
+                }
+                // sort by expiresAt
+                foundItems = _.sortBy(foundItems, function (item) {
+                    return item.expiresAt;
+                });
+                var foundToken;
+                if (foundItems.length) {
+                    foundToken = foundItems.last().value;
                 }
                 resolve(foundToken);
             });
@@ -1603,6 +1790,12 @@ define('modules/uv-shared-module/BaseExtension',["require", "exports", "./BaseCo
                         else {
                             reject(resource.error.statusText);
                         }
+                    }
+                    else if (resource.error.status === HTTPStatusCode.FORBIDDEN) {
+                        var error = new Error();
+                        error.message = "Forbidden";
+                        error.name = manifesto.StatusCodes.FORBIDDEN.toString();
+                        reject(error);
                     }
                     else {
                         reject(resource.error.statusText);
@@ -1837,6 +2030,8 @@ define('modules/uv-dialogues-module/EmbedDialogue',["require", "exports", "../uv
             this.$firstRow.find('.leftCol').append(this.$link);
             this.$image = $('<img class="share" />');
             this.$link.append(this.$image);
+            this.$url = $('<input class="url" type="text"></input>');
+            this.$firstRow.find('.rightCol').append(this.$url);
             this.$intro = $('<p>' + this.content.instructions + '</p>');
             this.$firstRow.find('.rightCol').append(this.$intro);
             this.$code = $('<textarea class="code"></textarea>');
@@ -1872,8 +2067,9 @@ define('modules/uv-dialogues-module/EmbedDialogue',["require", "exports", "../uv
             this.$customHeight = $('<input id="height" type="text" maxlength="5" />');
             this.$customSizeHeightWrap.append(this.$customHeight);
             this.$customSizeHeightWrap.append('<span>px</span>');
-            // initialise ui.
-            // ui event handlers.
+            this.$url.click(function () {
+                $(this).select();
+            });
             this.$code.focus(function () {
                 $(this).select();
             });
@@ -1969,6 +2165,7 @@ define('modules/uv-dialogues-module/EmbedDialogue',["require", "exports", "../uv
             }
             this.$link.attr('href', thumbnail);
             this.$image.attr('src', thumbnail);
+            this.$url.val(this.provider.getShareUrl());
         };
         EmbedDialogue.prototype.close = function () {
             _super.prototype.close.call(this);
@@ -2034,6 +2231,8 @@ define('modules/uv-shared-module/FooterPanel',["require", "exports", "./BaseComm
             });
             this.$options = $('<div class="options"></div>');
             this.$element.append(this.$options);
+            this.$feedbackButton = $('<a class="feedback" title="' + this.content.feedback + '">' + this.content.feedback + '</a>');
+            this.$options.prepend(this.$feedbackButton);
             this.$openButton = $('<a class="open" title="' + this.content.open + '">' + this.content.open + '</a>');
             this.$options.prepend(this.$openButton);
             this.$bookmarkButton = $('<a class="bookmark" title="' + this.content.bookmark + '">' + this.content.bookmark + '</a>');
@@ -2048,6 +2247,9 @@ define('modules/uv-shared-module/FooterPanel',["require", "exports", "./BaseComm
             this.$fullScreenBtn.attr('tabindex', '5');
             this.$openButton.onPressed(function () {
                 $.publish(BaseCommands.OPEN);
+            });
+            this.$feedbackButton.onPressed(function () {
+                $.publish(BaseCommands.FEEDBACK);
             });
             this.$bookmarkButton.onPressed(function () {
                 $.publish(BaseCommands.BOOKMARK);
@@ -2067,6 +2269,7 @@ define('modules/uv-shared-module/FooterPanel',["require", "exports", "./BaseComm
                 this.$embedButton.hide();
             }
             this.updateOpenButton();
+            this.updateFeedbackButton();
             this.updateBookmarkButton();
             this.updateDownloadButton();
             this.updateFullScreenButton();
@@ -2108,6 +2311,15 @@ define('modules/uv-shared-module/FooterPanel',["require", "exports", "./BaseComm
             }
             else {
                 this.$downloadButton.hide();
+            }
+        };
+        FooterPanel.prototype.updateFeedbackButton = function () {
+            var configEnabled = Utils.Bools.GetBool(this.options.feedbackEnabled, false);
+            if (configEnabled) {
+                this.$feedbackButton.show();
+            }
+            else {
+                this.$feedbackButton.hide();
             }
         };
         FooterPanel.prototype.updateBookmarkButton = function () {
@@ -2889,26 +3101,76 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-define('modules/uv-moreinforightpanel-module/MoreInfoRightPanel',["require", "exports", "../uv-shared-module/RightPanel"], function (require, exports, RightPanel) {
+define('modules/uv-moreinforightpanel-module/MoreInfoRightPanel',["require", "exports", "../uv-shared-module/BaseCommands", "../uv-shared-module/RightPanel"], function (require, exports, BaseCommands, RightPanel) {
     var MoreInfoRightPanel = (function (_super) {
         __extends(MoreInfoRightPanel, _super);
         function MoreInfoRightPanel($element) {
             _super.call(this, $element);
+            this.limitType = "lines";
+            this.limit = 4;
         }
         MoreInfoRightPanel.prototype.create = function () {
+            var _this = this;
             this.setConfig('moreInfoRightPanel');
             _super.prototype.create.call(this);
+            if (this.config.options.textLimitType) {
+                this.limitType = this.config.options.textLimitType;
+            }
+            if (this.limitType === "lines") {
+                this.limit = this.config.options.textLimit ? this.config.options.textLimit : 4;
+            }
+            else if (this.limitType === "chars") {
+                this.limit = this.config.options.textLimit ? this.config.options.textLimit : 130;
+            }
+            this.aggregateValuesConfig = this.readConfig(this.options.aggregateValues);
+            this.canvasExcludeConfig = this.readConfig(this.options.canvasExclude);
+            this.manifestData = this.getManifestData();
+            this.canvasData = [];
             this.moreInfoItemTemplate = $('<div class="item">\
                                            <div class="header"></div>\
                                            <div class="text"></div>\
                                        </div>');
             this.$items = $('<div class="items"></div>');
             this.$main.append(this.$items);
+            this.$canvasItems = $('<div class="items"></div>');
+            this.$main.append(this.$canvasItems);
             this.$noData = $('<div class="noData">' + this.content.noData + '</div>');
             this.$main.append(this.$noData);
             this.$expandButton.attr('tabindex', '4');
             this.$collapseButton.attr('tabindex', '4');
             this.setTitle(this.content.title);
+            $.subscribe(BaseCommands.CANVAS_INDEX_CHANGED, function (e, canvasIndex) {
+                _this.canvasData = _this.getCanvasData(_this.provider.getCanvasByIndex(canvasIndex));
+                _this.displayInfo();
+            });
+        };
+        MoreInfoRightPanel.prototype.getManifestData = function () {
+            var data = this.provider.getMetadata();
+            if (this.options.displayOrder) {
+                data = this.sort(data, this.readConfig(this.options.displayOrder));
+            }
+            if (this.options.manifestExclude) {
+                data = this.exclude(data, this.readConfig(this.options.manifestExclude));
+            }
+            return this.flatten(data);
+        };
+        MoreInfoRightPanel.prototype.getCanvasData = function (canvas) {
+            var data = this.provider.getCanvasMetadata(canvas);
+            if (this.canvasExcludeConfig.length !== 0) {
+                data = this.exclude(data, this.canvasExcludeConfig);
+            }
+            return this.flatten(data);
+        };
+        MoreInfoRightPanel.prototype.readConfig = function (config) {
+            if (config) {
+                return config
+                    .toLowerCase()
+                    .replace(/ /g, "")
+                    .split(',');
+            }
+            else {
+                return [];
+            }
         };
         MoreInfoRightPanel.prototype.toggleFinish = function () {
             _super.prototype.toggleFinish.call(this);
@@ -2919,61 +3181,48 @@ define('modules/uv-moreinforightpanel-module/MoreInfoRightPanel',["require", "ex
         MoreInfoRightPanel.prototype.getInfo = function () {
             // show loading icon.
             this.$main.addClass('loading');
-            var data = this.provider.getMetadata();
-            this.displayInfo(data);
+            this.displayInfo();
         };
-        MoreInfoRightPanel.prototype.displayInfo = function (data) {
-            var _this = this;
+        MoreInfoRightPanel.prototype.displayInfo = function () {
             this.$main.removeClass('loading');
-            if (!data) {
+            if (this.manifestData.length == 0 && this.canvasData.length == 0) {
                 this.$noData.show();
                 return;
             }
             this.$noData.hide();
-            var limitType = "lines";
-            if (this.config.options.textLimitType) {
-                limitType = this.config.options.textLimitType;
-            }
-            var limit;
-            if (limitType === "lines") {
-                limit = this.config.options.textLimit ? this.config.options.textLimit : 4;
-            }
-            else if (limitType === "chars") {
-                limit = this.config.options.textLimit ? this.config.options.textLimit : 130;
-            }
-            var displayOrderConfig = this.options.displayOrder;
-            if (displayOrderConfig) {
-                displayOrderConfig = displayOrderConfig.toLowerCase();
-                displayOrderConfig = displayOrderConfig.replace(/ /g, "");
-                var displayOrder = displayOrderConfig.split(',');
-                // sort items
-                var sorted = [];
-                _.each(displayOrder, function (item) {
-                    var match = data.en().where((function (x) { return x.label.toLowerCase() === item; })).first();
-                    if (match) {
-                        sorted.push(match);
-                        data.remove(match);
-                    }
-                });
-                // add remaining items that were not in the displayOrder.
-                _.each(data, function (item) {
-                    sorted.push(item);
-                });
-                data = sorted;
-            }
-            // Exclusions
-            var excludeConfig = this.options.exclude;
-            if (excludeConfig) {
-                excludeConfig = excludeConfig.toLowerCase();
-                excludeConfig = excludeConfig.replace(/ /g, "");
-                var exclude = excludeConfig.split(',');
-                _.each(exclude, function (item) {
-                    var match = data.en().where((function (x) { return x.label.toLowerCase() === item; })).first();
-                    if (match) {
-                        data.remove(match);
-                    }
-                });
-            }
+            var manifestRenderData = $.extend(true, [], this.manifestData);
+            var canvasRenderData = $.extend(true, [], this.canvasData);
+            this.aggregateValues(manifestRenderData, canvasRenderData);
+            this.renderElement(this.$items, manifestRenderData, this.content.manifestHeader, canvasRenderData.length !== 0);
+            this.renderElement(this.$canvasItems, canvasRenderData, this.content.canvasHeader, manifestRenderData.length !== 0);
+        };
+        MoreInfoRightPanel.prototype.sort = function (data, displayOrder) {
+            // sort items
+            var sorted = [];
+            _.each(displayOrder, function (item) {
+                var match = data.en().where((function (x) { return x.label.toLowerCase() === item; })).first();
+                if (match) {
+                    sorted.push(match);
+                    data.remove(match);
+                }
+            });
+            // add remaining items that were not in the displayOrder.
+            _.each(data, function (item) {
+                sorted.push(item);
+            });
+            return sorted;
+        };
+        MoreInfoRightPanel.prototype.exclude = function (data, excludeConfig) {
+            var excluded = $.extend(true, [], data);
+            _.each(excludeConfig, function (item) {
+                var match = excluded.en().where((function (x) { return x.label.toLowerCase() === item; })).first();
+                if (match) {
+                    excluded.remove(match);
+                }
+            });
+            return excluded;
+        };
+        MoreInfoRightPanel.prototype.flatten = function (data) {
             // flatten metadata into array.
             var flattened = [];
             _.each(data, function (item) {
@@ -2984,17 +3233,46 @@ define('modules/uv-moreinforightpanel-module/MoreInfoRightPanel',["require", "ex
                     flattened.push(item);
                 }
             });
-            data = flattened;
-            _.each(data, function (item) {
-                var built = _this.buildItem(item);
-                _this.$items.append(built);
-                if (limitType === "lines") {
-                    built.find('.text').toggleExpandTextByLines(limit, _this.content.less, _this.content.more);
-                }
-                else if (limitType === "chars") {
-                    built.find('.text').ellipsisHtmlFixed(limit, null);
-                }
-            });
+            return flattened;
+        };
+        MoreInfoRightPanel.prototype.aggregateValues = function (fromData, toData) {
+            var _this = this;
+            if (this.aggregateValuesConfig.length !== 0) {
+                _.each(toData, function (item) {
+                    _.each(_this.aggregateValuesConfig, function (value) {
+                        if (item.label.toLowerCase() == value) {
+                            var manifestIndex = _.findIndex(fromData, function (x) { return x.label.toLowerCase() == value.toLowerCase(); });
+                            if (manifestIndex != -1) {
+                                var data = fromData.splice(manifestIndex, 1)[0];
+                                item.value = data.value + item.value;
+                            }
+                        }
+                    });
+                });
+            }
+        };
+        MoreInfoRightPanel.prototype.renderElement = function (element, data, header, renderHeader) {
+            var _this = this;
+            element.empty();
+            if (data.length !== 0) {
+                if (renderHeader && header)
+                    element.append(this.buildHeader(header));
+                _.each(data, function (item) {
+                    var built = _this.buildItem(item);
+                    element.append(built);
+                    if (_this.limitType === "lines") {
+                        built.find('.text').toggleExpandTextByLines(_this.limit, _this.content.less, _this.content.more);
+                    }
+                    else if (_this.limitType === "chars") {
+                        built.find('.text').ellipsisHtmlFixed(_this.limit, null);
+                    }
+                });
+            }
+        };
+        MoreInfoRightPanel.prototype.buildHeader = function (label) {
+            var $header = $('<div class="header"></div>');
+            $header.html(this.provider.sanitize(label));
+            return $header;
         };
         MoreInfoRightPanel.prototype.buildItem = function (item) {
             var $elem = this.moreInfoItemTemplate.clone();
@@ -3038,7 +3316,7 @@ define('modules/uv-moreinforightpanel-module/MoreInfoRightPanel',["require", "ex
 });
 
 define('_Version',["require", "exports"], function (require, exports) {
-    exports.Version = '1.6.17';
+    exports.Version = '1.7.9';
 });
 
 var __extends = (this && this.__extends) || function (d, b) {
@@ -3147,14 +3425,15 @@ define('extensions/uv-seadragon-extension/Commands',["require", "exports"], func
         Commands.DOWNLOAD_ENTIREDOCUMENTASTEXT = Commands.namespace + 'onDownloadEntireDocumentAsText';
         Commands.DOWNLOAD_WHOLEIMAGEHIGHRES = Commands.namespace + 'onDownloadWholeImageHighRes';
         Commands.DOWNLOAD_WHOLEIMAGELOWRES = Commands.namespace + 'onDownloadWholeImageLowRes';
-        Commands.ENTER_MULTI_SELECTION_MODE = Commands.namespace + 'onEnterMultiSelectionMode';
-        Commands.EXIT_MULTI_SELECTION_MODE = Commands.namespace + 'onExitMultiSelectionMode';
+        Commands.ENTER_MULTISELECT_MODE = Commands.namespace + 'onEnterMultiSelectMode';
+        Commands.EXIT_MULTISELECT_MODE = Commands.namespace + 'onExitMultiSelectMode';
         Commands.FIRST = Commands.namespace + 'onFirst';
         Commands.GALLERY_THUMB_SELECTED = Commands.namespace + 'onGalleryThumbSelected';
         Commands.IMAGE_SEARCH = Commands.namespace + 'onImageSearch';
         Commands.LAST = Commands.namespace + 'onLast';
         Commands.MODE_CHANGED = Commands.namespace + 'onModeChanged';
-        Commands.MULTI_SELECTION = Commands.namespace + 'onMultiSelection';
+        Commands.MULTISELECTION_MADE = Commands.namespace + 'onMultiSelectionMade';
+        Commands.MULTISELECT_CHANGE = Commands.namespace + 'onMultiSelectChange';
         Commands.NEXT = Commands.namespace + 'onNext';
         Commands.NEXT_SEARCH_RESULT = Commands.namespace + 'onNextSearchResult';
         Commands.OPEN_THUMBS_VIEW = Commands.namespace + 'onOpenThumbsView';
@@ -3173,6 +3452,8 @@ define('extensions/uv-seadragon-extension/Commands',["require", "exports"], func
         Commands.SEARCH_PREVIEW_START = Commands.namespace + 'onSearchPreviewStart';
         Commands.SEARCH_RESULTS = Commands.namespace + 'onSearchResults';
         Commands.SEARCH_RESULTS_EMPTY = Commands.namespace + 'onSearchResultsEmpty';
+        Commands.THUMB_MULTISELECTED = Commands.namespace + 'onThumbMultiSelected';
+        Commands.TREE_NODE_MULTISELECTED = Commands.namespace + 'onTreeNodeMultiSelected';
         Commands.TREE_NODE_SELECTED = Commands.namespace + 'onTreeNodeSelected';
         Commands.VIEW_PAGE = Commands.namespace + 'onViewPage';
         return Commands;
@@ -3223,11 +3504,21 @@ define('modules/uv-contentleftpanel-module/GalleryView',["require", "exports", "
             $.subscribe(Commands.SEARCH_PREVIEW_FINISH, function () {
                 _this.searchPreviewFinish();
             });
+            $.subscribe(Commands.ENTER_MULTISELECT_MODE, function () {
+                _this.dataBind();
+                _this.resize();
+            });
+            $.subscribe(Commands.EXIT_MULTISELECT_MODE, function () {
+                _this.dataBind();
+            });
+            $.subscribe(Commands.MULTISELECT_CHANGE, function (s, state) {
+                _this._multiSelectStateChange(state);
+            });
             this.$header = $('<div class="header"></div>');
             this.$element.append(this.$header);
             this.$sizeDownButton = $('<input class="btn btn-default size-down" type="button" value="-" />');
             this.$header.append(this.$sizeDownButton);
-            this.$sizeRange = $('<input type="range" name="size" min="0" max="10" value="5" />');
+            this.$sizeRange = $('<input type="range" name="size" min="1" max="10" value="6" />');
             this.$header.append(this.$sizeRange);
             this.$sizeUpButton = $('<input class="btn btn-default size-up" type="button" value="+" />');
             this.$header.append(this.$sizeUpButton);
@@ -3255,11 +3546,16 @@ define('modules/uv-contentleftpanel-module/GalleryView',["require", "exports", "
                 _this.scrollToThumb(_this.getSelectedThumbIndex());
             });
             $.templates({
-                galleryThumbsTemplate: '<div class="{{:~className()}}" data-src="{{>uri}}" data-index="{{>index}}" data-visible="{{>visible}}" data-width="{{>width}}" data-height="{{>height}}">\
-                                        <div class="wrap"></div>\
-                                        <span class="index">{{:#index + 1}}</span>\
-                                        <span class="label" title="{{>label}}">{{>label}}&nbsp;</span>\
-                                     </div>'
+                galleryThumbsTemplate: '\
+                <div class="{{:~className()}}" data-src="{{>uri}}" data-index="{{>index}}" data-visible="{{>visible}}" data-width="{{>width}}" data-height="{{>height}}">\
+                    <div class="wrap" data-link="class{merge:multiSelected toggle=\'multiSelected\'}">\
+                    {^{if multiSelectionEnabled}}\
+                        <input id="thumb-checkbox-{{>id}}" type="checkbox" data-link="checked{:multiSelected ? \'checked\' : \'\'}" class="multiSelect" />\
+                    {{/if}}\
+                    </div>\
+                    <span class="index">{{:#index + 1}}</span>\
+                    <span class="label" title="{{>label}}">{{>label}}&nbsp;</span>\
+                </div>'
             });
             $.views.helpers({
                 className: function () {
@@ -3285,6 +3581,7 @@ define('modules/uv-contentleftpanel-module/GalleryView',["require", "exports", "
         GalleryView.prototype.dataBind = function () {
             if (!this.thumbs)
                 return;
+            this._reset();
             this.createThumbs();
         };
         GalleryView.prototype.createThumbs = function () {
@@ -3292,15 +3589,70 @@ define('modules/uv-contentleftpanel-module/GalleryView',["require", "exports", "
             if (!this.thumbs)
                 return;
             this.$thumbs.link($.templates.galleryThumbsTemplate, this.thumbs);
-            this.$thumbs.delegate(".thumb", "click", function (e) {
-                e.preventDefault();
-                var data = $.view(this).data;
-                that.lastThumbClickedIndex = data.index;
-                $.publish(BaseCommands.THUMB_SELECTED, [data.index]);
-            });
+            if (!that.multiSelectState.enabled) {
+                // add a selection click event to all thumbs
+                this.$thumbs.delegate('.thumb', 'click', function (e) {
+                    e.preventDefault();
+                    var data = $.view(this).data;
+                    that.lastThumbClickedIndex = data.index;
+                    $.publish(BaseCommands.THUMB_SELECTED, [data.index]);
+                });
+            }
+            else {
+                // make each thumb a checkboxButton
+                $.each(this.$thumbs.find('.thumb'), function (index, thumb) {
+                    var $thumb = $(thumb);
+                    $thumb.checkboxButton(function (checked) {
+                        var data = $.view(this).data;
+                        that._setThumbMultiSelected(data, !data.multiSelected);
+                        $.publish(Commands.THUMB_MULTISELECTED, [data]);
+                    });
+                });
+            }
             this.selectIndex(this.provider.canvasIndex);
             this.setLabel();
             this.updateThumbs();
+        };
+        GalleryView.prototype._getThumbsByRange = function (range) {
+            var thumbs = [];
+            for (var i = 0; i < this.thumbs.length; i++) {
+                var thumb = this.thumbs[i];
+                var canvas = thumb.data;
+                var r = this.provider.getCanvasRange(canvas);
+                if (r && r.id === range.id) {
+                    thumbs.push(thumb);
+                }
+            }
+            return thumbs;
+        };
+        GalleryView.prototype._multiSelectStateChange = function (state) {
+            this.multiSelectState = state;
+            if (state.enabled) {
+                this.$thumbs.addClass("multiSelect");
+            }
+            else {
+                this.$thumbs.removeClass("multiSelect");
+            }
+            for (var j = 0; j < state.canvases.length; j++) {
+                var canvas = state.canvases[j];
+                var thumb = this._getThumbByCanvas(canvas);
+                this._setThumbMultiSelected(thumb, canvas.multiSelected);
+            }
+            // range selections override canvas selections
+            for (var i = 0; i < state.ranges.length; i++) {
+                var range = state.ranges[i];
+                var thumbs = this._getThumbsByRange(range);
+                for (var k = 0; k < thumbs.length; k++) {
+                    var thumb = thumbs[k];
+                    this._setThumbMultiSelected(thumb, range.multiSelected);
+                }
+            }
+        };
+        GalleryView.prototype._getThumbByCanvas = function (canvas) {
+            return this.thumbs.en().where(function (c) { return c.data.id === canvas.id; }).first();
+        };
+        GalleryView.prototype._setThumbMultiSelected = function (thumb, selected) {
+            $.observable(thumb).setProperty("multiSelected", selected);
         };
         GalleryView.prototype.updateThumbs = function () {
             if (!this.thumbs || !this.thumbs.length)
@@ -3340,13 +3692,7 @@ define('modules/uv-contentleftpanel-module/GalleryView',["require", "exports", "
             $wrap.height(height * this.range);
             $label.width(width * this.range);
         };
-        //sizeThumbImage($thumb: JQuery) : void {
-        //    var width = $thumb.data('width');
-        //    var height = $thumb.data('height');
-        //
-        //    var $img = $thumb.find('img');
-        //}
-        GalleryView.prototype.loadThumb = function ($thumb, callback) {
+        GalleryView.prototype.loadThumb = function ($thumb, cb) {
             var $wrap = $thumb.find('.wrap');
             if ($wrap.hasClass('loading') || $wrap.hasClass('loaded'))
                 return;
@@ -3356,16 +3702,16 @@ define('modules/uv-contentleftpanel-module/GalleryView',["require", "exports", "
             if (visible !== "false") {
                 $wrap.addClass('loading');
                 var src = $thumb.attr('data-src');
-                var img = $('<img src="' + src + '" />');
+                var img = $('<img class="thumbImage" src="' + src + '" />');
                 // fade in on load.
                 $(img).hide().load(function () {
                     $(this).fadeIn(fadeDuration, function () {
                         $(this).parent().swapClass('loading', 'loaded');
                     });
                 });
-                $wrap.append(img);
-                if (callback)
-                    callback(img);
+                $wrap.prepend(img);
+                if (cb)
+                    cb(img);
             }
             else {
                 $wrap.addClass('hidden');
@@ -3402,7 +3748,7 @@ define('modules/uv-contentleftpanel-module/GalleryView',["require", "exports", "
         };
         GalleryView.prototype.selectIndex = function (index) {
             // may be authenticating
-            if (index == -1)
+            if (index === -1)
                 return;
             if (!this.thumbs || !this.thumbs.length)
                 return;
@@ -3412,6 +3758,16 @@ define('modules/uv-contentleftpanel-module/GalleryView',["require", "exports", "
             this.$selectedThumb.addClass('selected');
             // make sure visible images are loaded.
             this.updateThumbs();
+        };
+        GalleryView.prototype._setMultiSelectionEnabled = function (enabled) {
+            for (var i = 0; i < this.thumbs.length; i++) {
+                var thumb = this.thumbs[i];
+                thumb.multiSelectionEnabled = enabled;
+            }
+        };
+        GalleryView.prototype._reset = function () {
+            this.$thumbs.undelegate('.thumb', 'click');
+            this._setMultiSelectionEnabled(this.multiSelectState.enabled);
         };
         GalleryView.prototype.getSelectedThumbIndex = function () {
             return Number(this.$selectedThumb.data('index'));
@@ -3608,6 +3964,8 @@ define('modules/uv-contentleftpanel-module/ThumbsView',["require", "exports", ".
             this.loadThumbs(0);
             this.isCreated = true;
         };
+        ThumbsView.prototype.selectAll = function (selected) {
+        };
         ThumbsView.prototype.scrollStop = function () {
             var scrollPos = 1 / ((this.$thumbs.height() - this.$element.height()) / this.$element.scrollTop());
             if (scrollPos > 1)
@@ -3769,19 +4127,16 @@ define('modules/uv-contentleftpanel-module/TreeView',["require", "exports", "../
         function TreeView($element) {
             _super.call(this, $element, true, true);
             this.isOpen = false;
-            this.multiSelectionMode = false;
         }
         TreeView.prototype.create = function () {
             var _this = this;
             _super.prototype.create.call(this);
             var that = this;
-            $.subscribe(Commands.ENTER_MULTI_SELECTION_MODE, function () {
-                _this.multiSelectionMode = true;
+            $.subscribe(Commands.ENTER_MULTISELECT_MODE, function () {
                 _this.dataBind();
             });
-            $.subscribe(Commands.EXIT_MULTI_SELECTION_MODE, function () {
-                _this.multiSelectionMode = false;
-                _this.dataBind();
+            $.subscribe(Commands.MULTISELECT_CHANGE, function (s, state) {
+                _this._multiSelectStateChange(state);
             });
             this.$tree = $('<ul class="tree"></ul>');
             this.$element.append(this.$tree);
@@ -3796,12 +4151,12 @@ define('modules/uv-contentleftpanel-module/TreeView',["require", "exports", "../
                                <div class="spacer"></div>\
                                {{/if}}\
                                {^{if multiSelectionEnabled}}\
-                                    <input type="checkbox" data-link="checked{:multiSelected ? \'checked\' : \'\'}" class="multiSelect" />\
+                                    <input id="tree-checkbox-{{>id}}" type="checkbox" data-link="checked{:multiSelected ? \'checked\' : \'\'}" class="multiSelect" />\
                                {{/if}}\
                                {^{if selected}}\
-                                   <a href="#" title="{{>label}}" class="selected" data-link="~elide(text)"></a>\
+                                   <a id="tree-link-{{>id}}" href="#" title="{{>label}}" class="selected" data-link="~elide(text)"></a>\
                                {{else}}\
-                                   <a href="#" title="{{>label}}" data-link="~elide(text)"></a>\
+                                   <a id="tree-link-{{>id}}" href="#" title="{{>label}}" data-link="~elide(text)"></a>\
                                {{/if}}\
                            </li>\
                            {^{if expanded}}\
@@ -3825,10 +4180,11 @@ define('modules/uv-contentleftpanel-module/TreeView',["require", "exports", "../
             $.views.tags({
                 tree: {
                     toggleExpanded: function () {
-                        $.observable(this.data).setProperty("expanded", !this.data.expanded);
+                        that._setNodeExpanded(this.data, !this.data.expanded);
                     },
                     toggleMultiSelect: function () {
                         that._multiSelectTreeNode(this.data, !this.data.multiSelected);
+                        that._updateParentNodes(this.data);
                     },
                     init: function (tagCtx, linkCtx, ctx) {
                         var data = tagCtx.view.data;
@@ -3844,7 +4200,12 @@ define('modules/uv-contentleftpanel-module/TreeView',["require", "exports", "../
                             e.preventDefault();
                             if (self.data.nodes.length)
                                 self.toggleExpanded();
-                            $.publish(Commands.TREE_NODE_SELECTED, [self.data.data]);
+                            if (that.multiSelectState.enabled) {
+                                self.toggleMultiSelect();
+                            }
+                            else {
+                                $.publish(Commands.TREE_NODE_SELECTED, [self.data.data]);
+                            }
                         }).on('click', 'input.multiSelect', function (e) {
                             self.toggleMultiSelect();
                         });
@@ -3856,32 +4217,121 @@ define('modules/uv-contentleftpanel-module/TreeView',["require", "exports", "../
         TreeView.prototype.dataBind = function () {
             if (!this.rootNode)
                 return;
-            this._setMultiSelectionEnabled(this.multiSelectionMode);
+            this._reset();
             this.$tree.link($.templates.pageTemplate, this.rootNode);
             this.resize();
         };
+        TreeView.prototype._multiSelectStateChange = function (state) {
+            this.multiSelectState = state;
+            for (var i = 0; i < this.multiSelectState.ranges.length; i++) {
+                var range = this.multiSelectState.ranges[i];
+                var node = this._getMultiSelectableNodes().en().where(function (n) { return n.data.id === range.id; }).first();
+                this._setNodeMultiSelected(node, range.multiSelected);
+            }
+            this.dataBind();
+        };
+        TreeView.prototype._reset = function () {
+            this.allNodes = null;
+            this.multiSelectableNodes = null;
+            this._setMultiSelectionEnabled(this.multiSelectState.enabled);
+        };
+        TreeView.prototype.allNodesSelected = function () {
+            var applicableNodes = this._getMultiSelectableNodes();
+            var multiSelectedNodes = this.getMultiSelectedNodes();
+            return applicableNodes.length === multiSelectedNodes.length;
+        };
+        TreeView.prototype._getMultiSelectableNodes = function () {
+            var _this = this;
+            // if cached
+            if (this.multiSelectableNodes) {
+                return this.multiSelectableNodes;
+            }
+            return this.multiSelectableNodes = this._getAllNodes().en().where(function (n) { return _this._nodeIsMultiSelectable(n); }).toArray();
+        };
+        TreeView.prototype._nodeIsMultiSelectable = function (node) {
+            return (node.isManifest() && node.nodes.length > 0 || node.isRange());
+        };
         TreeView.prototype._getAllNodes = function () {
-            return this.rootNode.nodes.en().traverseUnique(function (node) { return node.nodes; }).toArray();
+            // if cached
+            if (this.allNodes) {
+                return this.allNodes;
+            }
+            return this.allNodes = this.rootNode.nodes.en().traverseUnique(function (node) { return node.nodes; }).toArray();
         };
         TreeView.prototype.getMultiSelectedNodes = function () {
-            return this._getAllNodes().en().where(function (n) { return n.multiSelected; }).toArray();
+            var _this = this;
+            return this._getAllNodes().en().where(function (n) { return _this._nodeIsMultiSelectable(n) && n.multiSelected; }).toArray();
         };
         TreeView.prototype.getNodeById = function (id) {
             return this._getAllNodes().en().where(function (n) { return n.id === id; }).first();
         };
         TreeView.prototype._multiSelectTreeNode = function (node, isSelected) {
-            $.observable(node).setProperty("multiSelected", isSelected);
+            if (!this._nodeIsMultiSelectable(node))
+                return;
+            this._setNodeMultiSelected(node, isSelected);
+            $.publish(Commands.TREE_NODE_MULTISELECTED, [node]);
             // recursively select/deselect child nodes
             for (var i = 0; i < node.nodes.length; i++) {
                 var n = node.nodes[i];
                 this._multiSelectTreeNode(n, isSelected);
             }
         };
+        TreeView.prototype._updateParentNodes = function (node) {
+            var parentNode = node.parentNode;
+            if (!parentNode)
+                return;
+            // expand parents if selected
+            if (node.selected) {
+                this._expandParents(node);
+            }
+            // get the number of selected children.
+            var checkedCount = parentNode.nodes.en().where(function (n) { return n.multiSelected; }).count();
+            // if any are checked, check the parent.
+            this._setNodeMultiSelected(parentNode, checkedCount > 0);
+            var indeterminate = checkedCount > 0 && checkedCount < parentNode.nodes.length;
+            this._setNodeIndeterminate(parentNode, indeterminate);
+            // cascade up tree
+            this._updateParentNodes(parentNode);
+        };
+        TreeView.prototype._expandParents = function (node) {
+            if (!node.parentNode)
+                return;
+            this._setNodeExpanded(node.parentNode, true);
+            this._expandParents(node.parentNode);
+        };
+        TreeView.prototype._setNodeSelected = function (node, selected) {
+            $.observable(node).setProperty("selected", selected);
+        };
+        TreeView.prototype._setNodeExpanded = function (node, expanded) {
+            $.observable(node).setProperty("expanded", expanded);
+        };
+        TreeView.prototype._setNodeMultiSelected = function (node, selected) {
+            $.observable(node).setProperty("multiSelected", selected);
+            if (!selected) {
+                this._setNodeIndeterminate(node, false);
+            }
+        };
+        TreeView.prototype._setNodeIndeterminate = function (node, indeterminate) {
+            var $checkbox = this._getNodeCheckbox(node);
+            $checkbox.prop("indeterminate", indeterminate);
+        };
+        TreeView.prototype._getNodeCheckbox = function (node) {
+            return $("#tree-checkbox-" + node.id);
+        };
+        TreeView.prototype._getNodeSiblings = function (node) {
+            var siblings = [];
+            if (node.parentNode) {
+                siblings = node.parentNode.nodes.en().where(function (n) { return n !== node; }).toArray();
+            }
+            return siblings;
+        };
         TreeView.prototype._setMultiSelectionEnabled = function (enabled) {
             var nodes = this._getAllNodes();
             for (var i = 0; i < nodes.length; i++) {
                 var node = nodes[i];
-                node.multiSelectionEnabled = enabled;
+                if (this._nodeIsMultiSelectable(node)) {
+                    node.multiSelectionEnabled = enabled;
+                }
             }
         };
         TreeView.prototype.selectPath = function (path) {
@@ -3895,22 +4345,15 @@ define('modules/uv-contentleftpanel-module/TreeView',["require", "exports", "../
         };
         TreeView.prototype.deselectCurrentNode = function () {
             if (this.selectedNode)
-                $.observable(this.selectedNode).setProperty("selected", false);
+                this._setNodeSelected(this.selectedNode, false);
         };
         TreeView.prototype.selectNode = function (node) {
             if (!this.rootNode)
                 return;
             this.deselectCurrentNode();
             this.selectedNode = node;
-            $.observable(this.selectedNode).setProperty("selected", true);
-            this.expandParents(this.selectedNode);
-        };
-        // walk up the tree expanding parent nodes.
-        TreeView.prototype.expandParents = function (node) {
-            if (!node.parentNode)
-                return;
-            $.observable(node.parentNode).setProperty("expanded", true);
-            this.expandParents(node.parentNode);
+            this._setNodeSelected(this.selectedNode, true);
+            this._updateParentNodes(this.selectedNode);
         };
         // walks down the tree using the specified path e.g. [2,2,0]
         TreeView.prototype.getNodeByPath = function (parentNode, path) {
@@ -3951,17 +4394,27 @@ define('modules/uv-contentleftpanel-module/TreeView',["require", "exports", "../
     return TreeView;
 });
 
+define('modules/uv-shared-module/MultiSelectState',["require", "exports"], function (require, exports) {
+    var MultiSelectState = (function () {
+        function MultiSelectState() {
+        }
+        return MultiSelectState;
+    })();
+    return MultiSelectState;
+});
+
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-define('modules/uv-contentleftpanel-module/ContentLeftPanel',["require", "exports", "../uv-shared-module/BaseCommands", "../../extensions/uv-seadragon-extension/Commands", "./GalleryView", "../uv-shared-module/LeftPanel", "./ThumbsView", "../../extensions/uv-seadragon-extension/TreeSortType", "./TreeView"], function (require, exports, BaseCommands, Commands, GalleryView, LeftPanel, ThumbsView, TreeSortType, TreeView) {
+define('modules/uv-contentleftpanel-module/ContentLeftPanel',["require", "exports", "../uv-shared-module/BaseCommands", "../../extensions/uv-seadragon-extension/Commands", "./GalleryView", "../uv-shared-module/LeftPanel", "./ThumbsView", "../../extensions/uv-seadragon-extension/TreeSortType", "./TreeView", "../uv-shared-module/MultiSelectState"], function (require, exports, BaseCommands, Commands, GalleryView, LeftPanel, ThumbsView, TreeSortType, TreeView, MultiSelectState) {
     var ContentLeftPanel = (function (_super) {
         __extends(ContentLeftPanel, _super);
         function ContentLeftPanel($element) {
             _super.call(this, $element);
-            this.multiSelectionMode = false;
+            this.isTreeViewOpen = false;
+            this.isThumbsViewOpen = false;
         }
         ContentLeftPanel.prototype.create = function () {
             var _this = this;
@@ -3980,24 +4433,47 @@ define('modules/uv-contentleftpanel-module/ContentLeftPanel',["require", "export
                 }
                 _this.selectCurrentTreeNode();
             });
-            $.subscribe(Commands.ENTER_MULTI_SELECTION_MODE, function (s, e) {
-                that.multiSelectionMode = true;
+            $.subscribe(Commands.ENTER_MULTISELECT_MODE, function (s, e) {
+                that._reset();
+                that.multiSelectState.enabled = true;
+                _this._publishMultiSelectStateChange();
                 that.setTitle(that.content.selection);
                 if (!that.isFullyExpanded) {
                     that.expandFull();
                 }
-                _this.$multiSelectOptions.show();
+                else {
+                    _this._showMultiSelectOptions();
+                }
                 _this.$selectButton.text(e);
             });
-            $.subscribe(Commands.EXIT_MULTI_SELECTION_MODE, function () {
-                that.multiSelectionMode = false;
+            $.subscribe(Commands.EXIT_MULTISELECT_MODE, function () {
+                that._reset();
+                that.multiSelectState.enabled = false;
+                $.publish(Commands.MULTISELECT_CHANGE, [that.multiSelectState]);
                 that.setTitle(that.content.title);
-                _this.$multiSelectOptions.hide();
+                that.$multiSelectOptions.hide();
             });
             $.subscribe(BaseCommands.LEFTPANEL_COLLAPSE_FULL_START, function () {
-                if (_this.multiSelectionMode) {
-                    $.publish(Commands.EXIT_MULTI_SELECTION_MODE);
+                if (that.multiSelectState.enabled) {
+                    $.publish(Commands.EXIT_MULTISELECT_MODE);
                 }
+            });
+            $.subscribe(BaseCommands.LEFTPANEL_EXPAND_FULL_START, function () {
+                if (that.multiSelectState.enabled) {
+                    that._showMultiSelectOptions();
+                }
+            });
+            $.subscribe(Commands.TREE_NODE_MULTISELECTED, function (s, node) {
+                if (node.isRange()) {
+                    _this._updateRangeMultiSelectState(node.data, node.multiSelected);
+                }
+            });
+            $.subscribe(Commands.THUMB_MULTISELECTED, function (s, thumb) {
+                var range = _this.provider.getCanvasRange(thumb.data);
+                if (range) {
+                    _this._updateRangeMultiSelectState(range, thumb.multiSelected);
+                }
+                _this._updateCanvasMultiSelectState(thumb.data, thumb.multiSelected);
             });
             this.$tabs = $('<div class="tabs"></div>');
             this.$main.append(this.$tabs);
@@ -4027,8 +4503,9 @@ define('modules/uv-contentleftpanel-module/ContentLeftPanel',["require", "export
             this.$sortButtonGroup.append(this.$sortByVolumeButton);
             this.$multiSelectOptions = $('<div class="multiSelect"></div>');
             this.$rightOptions.append(this.$multiSelectOptions);
-            this.$selectAllButton = $('<input id="multiSelectAll" type="checkbox" /><label for="multiSelectAll">' + this.content.selectAll + '</label>');
+            this.$selectAllButton = $('<div class="multiSelectAll"><input id="multiSelectAll" type="checkbox" /><label for="multiSelectAll">' + this.content.selectAll + '</label></div>');
             this.$multiSelectOptions.append(this.$selectAllButton);
+            this.$selectAllButtonCheckbox = $(this.$selectAllButton.find('input:checkbox'));
             this.$selectButton = $('<a class="btn btn-primary">' + this.content.select + '</a>');
             this.$multiSelectOptions.append(this.$selectButton);
             this.$views = $('<div class="views"></div>');
@@ -4055,12 +4532,14 @@ define('modules/uv-contentleftpanel-module/ContentLeftPanel',["require", "export
                 _this.openThumbsView();
                 $.publish(Commands.OPEN_THUMBS_VIEW);
             });
+            this.$selectAllButton.checkboxButton(function (checked) {
+                _this._multiSelectAll(checked);
+            });
             this.$selectButton.on('click', function () {
-                var selectedNodes = _this.treeView.getMultiSelectedNodes();
-                var ids = _.without(_.map(selectedNodes, function (node) {
-                    return node.data.id;
-                }), undefined);
-                $.publish(Commands.MULTI_SELECTION, [ids]);
+                var ids = _.map(that._getAllSelectedCanvases(), function (canvas) {
+                    return canvas.id;
+                });
+                $.publish(Commands.MULTISELECTION_MADE, [ids]);
             });
             this.$expandButton.attr('tabindex', '7');
             this.$collapseButton.attr('tabindex', '7');
@@ -4081,17 +4560,31 @@ define('modules/uv-contentleftpanel-module/ContentLeftPanel',["require", "export
                     this.$treeButton.addClass('first');
                 }
             }
+            this._reset();
         };
         ContentLeftPanel.prototype.createTreeView = function () {
             this.treeView = new TreeView(this.$treeView);
             this.treeView.elideCount = this.config.options.elideCount;
+            this.treeView.multiSelectState = this.multiSelectState;
             this.dataBindTreeView();
             this.updateTreeViewOptions();
         };
         ContentLeftPanel.prototype.dataBind = function () {
+            this._reset();
             this.dataBindThumbsView();
             this.dataBindTreeView();
             this.dataBindGalleryView();
+        };
+        ContentLeftPanel.prototype._reset = function () {
+            this.multiSelectState = new MultiSelectState();
+            this.multiSelectState.ranges = this.provider.getRanges();
+            this.multiSelectState.canvases = this.provider.getCurrentSequence().getCanvases();
+            //this.multiSelectState.ranges = _.cloneDeep(this.provider.getRanges());
+            //this.multiSelectState.canvases = <ICanvas[]>_.cloneDeep(this.provider.getCurrentSequence().getCanvases());
+        };
+        ContentLeftPanel.prototype._showMultiSelectOptions = function () {
+            this.$multiSelectOptions.show();
+            this.resize();
         };
         ContentLeftPanel.prototype.updateTreeViewOptions = function () {
             if (this.isCollection() && this.treeData.nodes.length && !isNaN(this.treeData.nodes[0].navDate.getTime())) {
@@ -4100,6 +4593,64 @@ define('modules/uv-contentleftpanel-module/ContentLeftPanel',["require", "export
             else {
                 this.$treeViewOptions.hide();
             }
+        };
+        ContentLeftPanel.prototype._multiSelectAll = function (selected) {
+            this._multiSelectRanges(this.multiSelectState.ranges, selected);
+            this._multiSelectCanvases(this.multiSelectState.canvases, selected);
+            this._publishMultiSelectStateChange();
+        };
+        ContentLeftPanel.prototype._multiSelectRanges = function (ranges, selected) {
+            for (var i = 0; i < ranges.length; i++) {
+                var range = ranges[i];
+                range.multiSelected = selected;
+                var canvases = this._getCanvasesByIds(range.getCanvasIds());
+                this._multiSelectCanvases(canvases, selected);
+            }
+        };
+        ContentLeftPanel.prototype._multiSelectCanvases = function (canvases, selected) {
+            for (var j = 0; j < canvases.length; j++) {
+                var canvas = canvases[j];
+                canvas.multiSelected = selected;
+            }
+        };
+        ContentLeftPanel.prototype._getCanvasById = function (id) {
+            return this.multiSelectState.canvases.en().where(function (c) { return c.id === id; }).first();
+        };
+        ContentLeftPanel.prototype._getCanvasesByIds = function (ids) {
+            var canvases = [];
+            for (var i = 0; i < ids.length; i++) {
+                var id = ids[i];
+                canvases.push(this._getCanvasById(id));
+            }
+            return canvases;
+        };
+        ContentLeftPanel.prototype._updateRangeMultiSelectState = function (range, selected) {
+            var r = this.multiSelectState.ranges.en().where(function (r) { return r.id === range.id; }).first();
+            r.multiSelected = selected;
+            var canvases = this.provider.getRangeCanvases(r);
+            this._multiSelectCanvases(canvases, selected);
+            this._publishMultiSelectStateChange();
+        };
+        ContentLeftPanel.prototype._updateCanvasMultiSelectState = function (canvas, selected) {
+            var c = this.multiSelectState.canvases.en().where(function (c) { return c.id === canvas.id; }).first();
+            c.multiSelected = selected;
+            this._publishMultiSelectStateChange();
+        };
+        ContentLeftPanel.prototype._publishMultiSelectStateChange = function () {
+            this.$selectAllButtonCheckbox.prop('checked', this._allRangesSelected() && this._allCanvasesSelected());
+            $.publish(Commands.MULTISELECT_CHANGE, [this.multiSelectState]);
+        };
+        ContentLeftPanel.prototype._allRangesSelected = function () {
+            return this._getAllSelectedRanges().length === this.multiSelectState.ranges.length;
+        };
+        ContentLeftPanel.prototype._getAllSelectedRanges = function () {
+            return this.multiSelectState.ranges.en().where(function (r) { return r.multiSelected; }).toArray();
+        };
+        ContentLeftPanel.prototype._allCanvasesSelected = function () {
+            return this._getAllSelectedCanvases().length === this.multiSelectState.canvases.length;
+        };
+        ContentLeftPanel.prototype._getAllSelectedCanvases = function () {
+            return this.multiSelectState.canvases.en().where(function (c) { return c.multiSelected; }).toArray();
         };
         ContentLeftPanel.prototype.sortByDate = function () {
             this.treeView.rootNode = this.provider.getSortedTree(TreeSortType.date);
@@ -4125,6 +4676,8 @@ define('modules/uv-contentleftpanel-module/ContentLeftPanel',["require", "export
                 return;
             this.treeView.rootNode = this.treeData;
             this.treeView.dataBind();
+            // ensure tree has current multiselect state
+            this._publishMultiSelectStateChange();
         };
         ContentLeftPanel.prototype.createThumbsView = function () {
             this.thumbsView = new ThumbsView(this.$thumbsView);
@@ -4148,6 +4701,7 @@ define('modules/uv-contentleftpanel-module/ContentLeftPanel',["require", "export
         };
         ContentLeftPanel.prototype.createGalleryView = function () {
             this.galleryView = new GalleryView(this.$galleryView);
+            this.galleryView.multiSelectState = this.multiSelectState;
             this.dataBindGalleryView();
         };
         ContentLeftPanel.prototype.dataBindGalleryView = function () {
@@ -4157,6 +4711,8 @@ define('modules/uv-contentleftpanel-module/ContentLeftPanel',["require", "export
             var height = this.config.options.galleryThumbHeight;
             this.galleryView.thumbs = this.provider.getThumbs(width, height);
             this.galleryView.dataBind();
+            // ensure gallery has current multiselect state
+            this._publishMultiSelectStateChange();
         };
         ContentLeftPanel.prototype.toggleFinish = function () {
             _super.prototype.toggleFinish.call(this);
@@ -4218,6 +4774,8 @@ define('modules/uv-contentleftpanel-module/ContentLeftPanel',["require", "export
         };
         ContentLeftPanel.prototype.openTreeView = function () {
             var _this = this;
+            this.isTreeViewOpen = true;
+            this.isThumbsViewOpen = false;
             if (!this.treeView) {
                 this.createTreeView();
             }
@@ -4239,6 +4797,8 @@ define('modules/uv-contentleftpanel-module/ContentLeftPanel',["require", "export
             this.treeView.resize();
         };
         ContentLeftPanel.prototype.openThumbsView = function () {
+            this.isTreeViewOpen = false;
+            this.isThumbsViewOpen = true;
             if (!this.thumbsView) {
                 this.createThumbsView();
             }
@@ -4530,6 +5090,20 @@ define('modules/uv-shared-module/BaseProvider',["require", "exports", "../../Boo
         BaseProvider.prototype.isSeeAlsoEnabled = function () {
             return this.config.options.seeAlsoEnabled !== false;
         };
+        BaseProvider.prototype.getCanvases = function () {
+            return this.getCurrentSequence().getCanvases();
+        };
+        BaseProvider.prototype.getCanvasById = function (id) {
+            return this.getCurrentSequence().getCanvasById(id);
+        };
+        BaseProvider.prototype.getCanvasesById = function (ids) {
+            var canvases = [];
+            for (var i = 0; i < ids.length; i++) {
+                var id = ids[i];
+                canvases.push(this.getCanvasById(id));
+            }
+            return canvases;
+        };
         BaseProvider.prototype.getCanvasByIndex = function (index) {
             return this.getCurrentSequence().getCanvasByIndex(index);
         };
@@ -4538,8 +5112,16 @@ define('modules/uv-shared-module/BaseProvider',["require", "exports", "../../Boo
         };
         BaseProvider.prototype.getCanvasRange = function (canvas) {
             // get ranges that contain the canvas id. return the last.
-            var ranges = this.manifest.getRanges();
-            return ranges.en().last(function (range) { return (range.getCanvases().en().any(function (c) { return c === canvas.id; })); });
+            return this.getCanvasRanges(canvas).last();
+        };
+        BaseProvider.prototype.getCanvasRanges = function (canvas) {
+            if (canvas.ranges) {
+                return canvas.ranges;
+            }
+            else {
+                canvas.ranges = this.manifest.getRanges().en().where(function (range) { return (range.getCanvasIds().en().any(function (c) { return c === canvas.id; })); }).toArray();
+            }
+            return canvas.ranges;
         };
         BaseProvider.prototype.getCurrentCanvas = function () {
             return this.getCurrentSequence().getCanvasByIndex(this.canvasIndex);
@@ -4547,24 +5129,15 @@ define('modules/uv-shared-module/BaseProvider',["require", "exports", "../../Boo
         BaseProvider.prototype.getCurrentSequence = function () {
             return this.getSequenceByIndex(this.sequenceIndex);
         };
+        BaseProvider.prototype.getRangeCanvases = function (range) {
+            var ids = range.getCanvasIds();
+            return this.getCanvasesById(ids);
+        };
         BaseProvider.prototype.getTotalCanvases = function () {
             return this.getCurrentSequence().getTotalCanvases();
         };
         BaseProvider.prototype.isMultiCanvas = function () {
             return this.getCurrentSequence().isMultiCanvas();
-        };
-        BaseProvider.prototype.isPagingAvailable = function () {
-            // paged mode is useless unless you have at least 3 pages...
-            return this.isPagingEnabled() && this.getTotalCanvases() > 2;
-        };
-        BaseProvider.prototype.isPagingEnabled = function () {
-            return this.getCurrentSequence().isPagingEnabled();
-        };
-        BaseProvider.prototype.isPagingSettingEnabled = function () {
-            if (this.isPagingAvailable()) {
-                return this.getSettings().pagingEnabled;
-            }
-            return false;
         };
         BaseProvider.prototype.getInfoUri = function (canvas) {
             // default to IxIF
@@ -4581,7 +5154,18 @@ define('modules/uv-shared-module/BaseProvider',["require", "exports", "../../Boo
             return [canvasIndex];
         };
         BaseProvider.prototype.getViewingDirection = function () {
-            return this.getCurrentSequence().getViewingDirection();
+            var viewingDirection = this.getCurrentSequence().getViewingDirection();
+            if (!viewingDirection.toString()) {
+                viewingDirection = this.manifest.getViewingDirection();
+            }
+            return viewingDirection;
+        };
+        BaseProvider.prototype.getViewingHint = function () {
+            var viewingHint = this.getCurrentSequence().getViewingHint();
+            if (!viewingHint.toString()) {
+                viewingHint = this.manifest.getViewingHint();
+            }
+            return viewingHint;
         };
         BaseProvider.prototype.getFirstPageIndex = function () {
             return 0;
@@ -4589,47 +5173,14 @@ define('modules/uv-shared-module/BaseProvider',["require", "exports", "../../Boo
         BaseProvider.prototype.getLastPageIndex = function () {
             return this.getTotalCanvases() - 1;
         };
-        BaseProvider.prototype.getPrevPageIndex = function (canvasIndex) {
-            if (typeof (canvasIndex) === 'undefined')
-                canvasIndex = this.canvasIndex;
-            var index;
-            if (this.isPagingSettingEnabled()) {
-                var indices = this.getPagedIndices(canvasIndex);
-                if (this.getViewingDirection().toString() === manifesto.ViewingDirection.rightToLeft().toString()) {
-                    index = indices.last() - 1;
-                }
-                else {
-                    index = indices[0] - 1;
-                }
-            }
-            else {
-                index = canvasIndex - 1;
-            }
-            return index;
-        };
-        BaseProvider.prototype.getNextPageIndex = function (canvasIndex) {
-            if (typeof (canvasIndex) === 'undefined')
-                canvasIndex = this.canvasIndex;
-            var index;
-            if (this.isPagingSettingEnabled()) {
-                var indices = this.getPagedIndices(canvasIndex);
-                if (this.getViewingDirection().toString() === manifesto.ViewingDirection.rightToLeft().toString()) {
-                    index = indices[0] + 1;
-                }
-                else {
-                    index = indices.last() + 1;
-                }
-            }
-            else {
-                index = canvasIndex + 1;
-            }
-            if (index > this.getTotalCanvases() - 1) {
-                return -1;
-            }
-            return index;
-        };
         BaseProvider.prototype.getStartCanvasIndex = function () {
             return this.getCurrentSequence().getStartCanvasIndex();
+        };
+        BaseProvider.prototype.getShareUrl = function () {
+            if (Utils.Documents.IsInIFrame()) {
+                return parent.document.location.href;
+            }
+            return document.location.href;
         };
         BaseProvider.prototype.addTimestamp = function (uri) {
             return uri + "?t=" + Utils.Dates.GetTimeStamp();
@@ -4649,6 +5200,9 @@ define('modules/uv-shared-module/BaseProvider',["require", "exports", "../../Boo
         BaseProvider.prototype.getCanvasIndexByLabel = function (label) {
             var foliated = this.getManifestType().toString() === manifesto.ManifestType.manuscript().toString();
             return this.getCurrentSequence().getCanvasIndexByLabel(label, foliated);
+        };
+        BaseProvider.prototype.getRanges = function () {
+            return this.manifest.getRanges();
         };
         BaseProvider.prototype.getTree = function () {
             return this.iiifResource.getTree();
@@ -4695,6 +5249,18 @@ define('modules/uv-shared-module/BaseProvider',["require", "exports", "../../Boo
                 result.push({
                     label: "logo",
                     value: '<img src="' + this.manifest.getLogo() + '"/>',
+                    isRootLevel: true
+                });
+            }
+            return result;
+        };
+        BaseProvider.prototype.getCanvasMetadata = function (canvas) {
+            var result = [];
+            var metadata = canvas.getMetadata();
+            if (metadata) {
+                result.push({
+                    label: "metadata",
+                    value: metadata,
                     isRootLevel: true
                 });
             }
@@ -5207,7 +5773,7 @@ define('extensions/uv-seadragon-extension/DownloadDialogue',["require", "exports
                             $.publish(Commands.DOWNLOAD_CURRENTVIEW);
                             break;
                         case DownloadOption.selection.toString():
-                            $.publish(Commands.ENTER_MULTI_SELECTION_MODE, [_this.content.downloadSelectionButton]);
+                            $.publish(Commands.ENTER_MULTISELECT_MODE, [_this.content.downloadSelectionButton]);
                             break;
                         case DownloadOption.wholeImageHighRes.toString():
                             window.open(_this.getOriginalImageForCurrentCanvas());
@@ -5235,9 +5801,14 @@ define('extensions/uv-seadragon-extension/DownloadDialogue',["require", "exports
                 var label = this.content.currentViewAsJpg;
                 var viewer = this.extension.getViewer();
                 var dimensions = this.provider.getCroppedImageDimensions(canvas, viewer);
-                label = String.format(label, dimensions.size.width, dimensions.size.height);
-                $label.text(label);
-                this.$currentViewAsJpgButton.show();
+                if (dimensions) {
+                    label = String.format(label, dimensions.size.width, dimensions.size.height);
+                    $label.text(label);
+                    this.$currentViewAsJpgButton.show();
+                }
+                else {
+                    this.$currentViewAsJpgButton.hide();
+                }
             }
             else {
                 this.$currentViewAsJpgButton.hide();
@@ -6558,6 +7129,8 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
             });
             this.title = this.extension.provider.getTitle();
             this.createNavigationButtons();
+            this.hidePrevButton();
+            this.hideNextButton();
             // if firefox, hide rotation and prev/next until this is resolved
             //var browser = window.browserDetect.browser;
             //if (browser == 'Firefox') {
@@ -6571,8 +7144,6 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
             this.resize();
         };
         SeadragonCenterPanel.prototype.createNavigationButtons = function () {
-            if (!this.provider.isMultiCanvas())
-                return;
             this.$leftButton = $('<div class="paging btn prev"></div>');
             this.$leftButton.prop('title', this.content.previous);
             this.viewer.addControl(this.$leftButton[0], { anchor: OpenSeadragon.ControlAnchor.TOP_LEFT });
@@ -6619,29 +7190,102 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
             });
         };
         SeadragonCenterPanel.prototype.positionPages = function () {
-            var viewingDirection = this.provider.getViewingDirection().toString();
-            // if there's more than one image, align them next to each other.
-            if (this.provider.resources.length > 1) {
-                // check if tilesources should be aligned horizontally or vertically
-                if (viewingDirection === manifesto.ViewingDirection.topToBottom().toString() || viewingDirection === manifesto.ViewingDirection.bottomToTop().toString()) {
-                    // vertical
-                    var topPage = this.viewer.world.getItemAt(0);
-                    var topPageBounds = topPage.getBounds(true);
-                    var y = topPageBounds.y + topPageBounds.height;
-                    var bottomPage = this.viewer.world.getItemAt(1);
-                    var bottomPagePos = bottomPage.getBounds(true).getTopLeft();
-                    bottomPagePos.y = y + this.config.options.pageGap;
-                    bottomPage.setPosition(bottomPagePos, true);
+            var resources = this.provider.resources;
+            var x;
+            var y;
+            var page;
+            var pageBounds;
+            var nextPage;
+            var nextPagePos;
+            var topPage;
+            var topPageBounds;
+            var bottomPage;
+            var bottomPagePos;
+            var leftPage;
+            var leftPageBounds;
+            var rightPage;
+            var rightPagePos;
+            // if there's more than one image, determine alignment strategy
+            if (resources.length > 1) {
+                if (resources.length === 2) {
+                    // recto verso
+                    if (this.provider.isVerticallyAligned()) {
+                        // vertical alignment
+                        topPage = this.viewer.world.getItemAt(0);
+                        topPageBounds = topPage.getBounds(true);
+                        y = topPageBounds.y + topPageBounds.height;
+                        bottomPage = this.viewer.world.getItemAt(1);
+                        bottomPagePos = bottomPage.getBounds(true).getTopLeft();
+                        bottomPagePos.y = y + this.config.options.pageGap;
+                        bottomPage.setPosition(bottomPagePos, true);
+                    }
+                    else {
+                        // horizontal alignment
+                        leftPage = this.viewer.world.getItemAt(0);
+                        leftPageBounds = leftPage.getBounds(true);
+                        x = leftPageBounds.x + leftPageBounds.width;
+                        rightPage = this.viewer.world.getItemAt(1);
+                        rightPagePos = rightPage.getBounds(true).getTopLeft();
+                        rightPagePos.x = x + this.config.options.pageGap;
+                        rightPage.setPosition(rightPagePos, true);
+                    }
                 }
                 else {
-                    // horizontal
-                    var leftPage = this.viewer.world.getItemAt(0);
-                    var leftPageBounds = leftPage.getBounds(true);
-                    var x = leftPageBounds.x + leftPageBounds.width;
-                    var rightPage = this.viewer.world.getItemAt(1);
-                    var rightPagePos = rightPage.getBounds(true).getTopLeft();
-                    rightPagePos.x = x + this.config.options.pageGap;
-                    rightPage.setPosition(rightPagePos, true);
+                    // scroll
+                    if (this.provider.isVerticallyAligned()) {
+                        // vertical alignment
+                        if (this.provider.isTopToBottom()) {
+                            // top to bottom
+                            for (var i = 0; i < resources.length - 1; i++) {
+                                page = this.viewer.world.getItemAt(i);
+                                pageBounds = page.getBounds(true);
+                                y = pageBounds.y + pageBounds.height;
+                                nextPage = this.viewer.world.getItemAt(i + 1);
+                                nextPagePos = nextPage.getBounds(true).getTopLeft();
+                                nextPagePos.y = y;
+                                nextPage.setPosition(nextPagePos, true);
+                            }
+                        }
+                        else {
+                            // bottom to top
+                            for (var i = resources.length; i > 0; i--) {
+                                page = this.viewer.world.getItemAt(i);
+                                pageBounds = page.getBounds(true);
+                                y = pageBounds.y - pageBounds.height;
+                                nextPage = this.viewer.world.getItemAt(i - 1);
+                                nextPagePos = nextPage.getBounds(true).getTopLeft();
+                                nextPagePos.y = y;
+                                nextPage.setPosition(nextPagePos, true);
+                            }
+                        }
+                    }
+                    else {
+                        // horizontal alignment
+                        if (this.provider.isLeftToRight()) {
+                            // left to right
+                            for (var i = 0; i < resources.length - 1; i++) {
+                                page = this.viewer.world.getItemAt(i);
+                                pageBounds = page.getBounds(true);
+                                x = pageBounds.x + pageBounds.width;
+                                nextPage = this.viewer.world.getItemAt(i + 1);
+                                nextPagePos = nextPage.getBounds(true).getTopLeft();
+                                nextPagePos.x = x;
+                                nextPage.setPosition(nextPagePos, true);
+                            }
+                        }
+                        else {
+                            // right to left
+                            for (var i = resources.length - 1; i > 0; i--) {
+                                page = this.viewer.world.getItemAt(i);
+                                pageBounds = page.getBounds(true);
+                                x = pageBounds.x - pageBounds.width;
+                                nextPage = this.viewer.world.getItemAt(i - 1);
+                                nextPagePos = nextPage.getBounds(true).getTopLeft();
+                                nextPagePos.x = x;
+                                nextPage.setPosition(nextPagePos, true);
+                            }
+                        }
+                    }
                 }
             }
         };
@@ -6671,7 +7315,9 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
                     this.goHome();
                 }
             }
-            if (this.provider.isMultiCanvas()) {
+            if (this.provider.isMultiCanvas() && !this.provider.isContinuous()) {
+                this.showPrevButton();
+                this.showNextButton();
                 $('.navigator').addClass('extraMargin');
                 if (!this.provider.isFirstCanvas()) {
                     this.enablePrevButton();
@@ -6710,6 +7356,14 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
             this.prevButtonEnabled = true;
             this.$leftButton.removeClass('disabled');
         };
+        SeadragonCenterPanel.prototype.hidePrevButton = function () {
+            this.disablePrevButton();
+            this.$leftButton.hide();
+        };
+        SeadragonCenterPanel.prototype.showPrevButton = function () {
+            this.enablePrevButton();
+            this.$leftButton.show();
+        };
         SeadragonCenterPanel.prototype.disableNextButton = function () {
             this.nextButtonEnabled = false;
             this.$rightButton.addClass('disabled');
@@ -6717,6 +7371,14 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
         SeadragonCenterPanel.prototype.enableNextButton = function () {
             this.nextButtonEnabled = true;
             this.$rightButton.removeClass('disabled');
+        };
+        SeadragonCenterPanel.prototype.hideNextButton = function () {
+            this.disableNextButton();
+            this.$rightButton.hide();
+        };
+        SeadragonCenterPanel.prototype.showNextButton = function () {
+            this.enableNextButton();
+            this.$rightButton.show();
         };
         SeadragonCenterPanel.prototype.serialiseBounds = function (bounds) {
             return bounds.x + ',' + bounds.y + ',' + bounds.width + ',' + bounds.height;
@@ -6805,6 +7467,7 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
             return newRects;
         };
         SeadragonCenterPanel.prototype.resize = function () {
+            var _this = this;
             _super.prototype.resize.call(this);
             this.$viewer.height(this.$content.height() - this.$viewer.verticalMargins());
             this.$viewer.width(this.$content.width() - this.$viewer.horizontalMargins());
@@ -6820,6 +7483,19 @@ define('modules/uv-seadragoncenterpanel-module/SeadragonCenterPanel',["require",
                 this.$leftButton.css('top', (this.$content.height() - this.$leftButton.height()) / 2);
                 this.$rightButton.css('top', (this.$content.height() - this.$rightButton.height()) / 2);
             }
+            // stretch navigator, allowing time for OSD to resize
+            setTimeout(function () {
+                if (_this.provider.isContinuous()) {
+                    if (_this.provider.isHorizontallyAligned()) {
+                        var width = _this.$viewer.width() - _this.$viewer.rightMargin();
+                        console.log(width);
+                        _this.$navigator.width(width);
+                    }
+                    else {
+                        _this.$navigator.height(_this.$viewer.height());
+                    }
+                }
+            }, 100);
         };
         SeadragonCenterPanel.prototype.setFocus = function () {
             var $canvas = $(this.viewer.canvas);
@@ -6856,6 +7532,7 @@ define('extensions/uv-seadragon-extension/SettingsDialogue',["require", "exports
             _super.prototype.create.call(this);
             this.$navigatorEnabled = $('<div class="setting navigatorEnabled"></div>');
             this.$scroll.append(this.$navigatorEnabled);
+            // todo: use .checkboxButton jquery extension
             this.$navigatorEnabledCheckbox = $('<input id="navigatorEnabled" type="checkbox" />');
             this.$navigatorEnabled.append(this.$navigatorEnabledCheckbox);
             this.$navigatorEnabledLabel = $('<label for="navigatorEnabled">' + this.content.navigatorEnabled + '</label>');
@@ -7023,8 +7700,8 @@ define('extensions/uv-seadragon-extension/Extension',["require", "exports", "../
                 var settings = _this.provider.getSettings();
                 $.publish(BaseCommands.SETTINGS_CHANGED, [settings]);
             });
-            $.subscribe(Commands.MULTI_SELECTION, function (e, ids) {
-                _this.triggerSocket(Commands.MULTI_SELECTION, ids);
+            $.subscribe(Commands.MULTISELECTION_MADE, function (e, ids) {
+                _this.triggerSocket(Commands.MULTISELECTION_MADE, ids);
             });
             $.subscribe(Commands.NEXT, function (e) {
                 _this.triggerSocket(Commands.NEXT);
@@ -7245,7 +7922,7 @@ define('extensions/uv-seadragon-extension/Extension',["require", "exports", "../
             var range = this.provider.getRangeByPath(path);
             if (!range)
                 return;
-            var canvasId = range.getCanvases()[0];
+            var canvasId = range.getCanvasIds()[0];
             var index = this.provider.getCanvasIndexById(canvasId);
             this.viewPage(index);
         };
@@ -7412,6 +8089,9 @@ define('extensions/uv-seadragon-extension/Provider',["require", "exports", "../.
                 return null;
             if (!viewer.viewport)
                 return null;
+            if (!canvas.getHeight() || !canvas.getWidth()) {
+                return null;
+            }
             var bounds = viewer.viewport.getBounds(true);
             var containerSize = viewer.viewport.getContainerSize();
             var zoom = viewer.viewport.getZoom(true);
@@ -7529,25 +8209,51 @@ define('extensions/uv-seadragon-extension/Provider',["require", "exports", "../.
             var script = String.format(template, this.getSerializedLocales(), configUri, this.manifestUri, this.collectionIndex, this.manifestIndex, this.sequenceIndex, this.canvasIndex, zoom, rotation, width, height, this.embedScriptUri);
             return script;
         };
-        Provider.prototype.getPagedIndices = function (canvasIndex) {
-            if (typeof (canvasIndex) === 'undefined')
+        Provider.prototype.getPrevPageIndex = function (canvasIndex) {
+            if (_.isUndefined(canvasIndex))
                 canvasIndex = this.canvasIndex;
-            var indices = [];
-            if (!this.isPagingSettingEnabled()) {
-                indices.push(this.canvasIndex);
-            }
-            else {
-                if (this.isFirstCanvas(canvasIndex) || (this.isLastCanvas(canvasIndex) && this.isTotalCanvasesEven())) {
-                    indices = [canvasIndex];
-                }
-                else if (canvasIndex % 2) {
-                    indices = [canvasIndex, canvasIndex + 1];
+            var index;
+            if (this.isPagingSettingEnabled()) {
+                var indices = this.getPagedIndices(canvasIndex);
+                if (this.isRightToLeft()) {
+                    index = indices.last() - 1;
                 }
                 else {
-                    indices = [canvasIndex - 1, canvasIndex];
+                    index = indices[0] - 1;
                 }
-                if (this.getViewingDirection().toString() === manifesto.ViewingDirection.rightToLeft().toString()) {
-                    indices = indices.reverse();
+            }
+            else {
+                index = canvasIndex - 1;
+            }
+            return index;
+        };
+        Provider.prototype.getPagedIndices = function (canvasIndex) {
+            if (_.isUndefined(canvasIndex))
+                canvasIndex = this.canvasIndex;
+            var indices = [];
+            // if it's a continuous manifest, get all resources.
+            if (this.isContinuous()) {
+                indices = _.map(this.getCanvases(), function (c, index) {
+                    return index;
+                });
+            }
+            else {
+                if (!this.isPagingSettingEnabled()) {
+                    indices.push(this.canvasIndex);
+                }
+                else {
+                    if (this.isFirstCanvas(canvasIndex) || (this.isLastCanvas(canvasIndex) && this.isTotalCanvasesEven())) {
+                        indices = [canvasIndex];
+                    }
+                    else if (canvasIndex % 2) {
+                        indices = [canvasIndex, canvasIndex + 1];
+                    }
+                    else {
+                        indices = [canvasIndex - 1, canvasIndex];
+                    }
+                    if (this.isRightToLeft()) {
+                        indices = indices.reverse();
+                    }
                 }
             }
             return indices;
@@ -7560,6 +8266,64 @@ define('extensions/uv-seadragon-extension/Provider',["require", "exports", "../.
                 return false;
             }
             return true;
+        };
+        Provider.prototype.isContinuous = function () {
+            return this.getViewingHint().toString() === manifesto.ViewingHint.continuous().toString();
+        };
+        Provider.prototype.isPaged = function () {
+            return this.getViewingHint().toString() === manifesto.ViewingHint.paged().toString();
+        };
+        Provider.prototype.isBottomToTop = function () {
+            return this.getViewingDirection().toString() === manifesto.ViewingDirection.bottomToTop().toString();
+        };
+        Provider.prototype.isTopToBottom = function () {
+            return this.getViewingDirection().toString() === manifesto.ViewingDirection.topToBottom().toString();
+        };
+        Provider.prototype.isLeftToRight = function () {
+            return this.getViewingDirection().toString() === manifesto.ViewingDirection.leftToRight().toString();
+        };
+        Provider.prototype.isRightToLeft = function () {
+            return this.getViewingDirection().toString() === manifesto.ViewingDirection.rightToLeft().toString();
+        };
+        Provider.prototype.isHorizontallyAligned = function () {
+            return this.isLeftToRight() || this.isRightToLeft();
+        };
+        Provider.prototype.isVerticallyAligned = function () {
+            return this.isTopToBottom() || this.isBottomToTop();
+        };
+        Provider.prototype.isPagingAvailable = function () {
+            // paged mode is useless unless you have at least 3 pages...
+            return this.isPagingEnabled() && this.getTotalCanvases() > 2;
+        };
+        Provider.prototype.isPagingEnabled = function () {
+            return this.getCurrentSequence().isPagingEnabled();
+        };
+        Provider.prototype.isPagingSettingEnabled = function () {
+            if (this.isPagingAvailable()) {
+                return this.getSettings().pagingEnabled;
+            }
+            return false;
+        };
+        Provider.prototype.getNextPageIndex = function (canvasIndex) {
+            if (_.isUndefined(canvasIndex))
+                canvasIndex = this.canvasIndex;
+            var index;
+            if (this.isPagingSettingEnabled()) {
+                var indices = this.getPagedIndices(canvasIndex);
+                if (this.isRightToLeft()) {
+                    index = indices[0] + 1;
+                }
+                else {
+                    index = indices.last() + 1;
+                }
+            }
+            else {
+                index = canvasIndex + 1;
+            }
+            if (index > this.getTotalCanvases() - 1) {
+                return -1;
+            }
+            return index;
         };
         Provider.prototype.getAutoCompleteService = function () {
             var service = this.getSearchWithinService();
@@ -8530,9 +9294,6 @@ var Manifesto;
         ServiceProfile.prototype.autoComplete = function () {
             return new ServiceProfile(ServiceProfile.AUTOCOMPLETE.toString());
         };
-        ServiceProfile.prototype.clickThrough = function () {
-            return new ServiceProfile(ServiceProfile.CLICKTHROUGH.toString());
-        };
         ServiceProfile.prototype.iiif1ImageLevel1 = function () {
             return new ServiceProfile(ServiceProfile.IIIF1IMAGELEVEL1.toString());
         };
@@ -8550,6 +9311,12 @@ var Manifesto;
         };
         ServiceProfile.prototype.login = function () {
             return new ServiceProfile(ServiceProfile.LOGIN.toString());
+        };
+        ServiceProfile.prototype.clickThrough = function () {
+            return new ServiceProfile(ServiceProfile.CLICKTHROUGH.toString());
+        };
+        ServiceProfile.prototype.restricted = function () {
+            return new ServiceProfile(ServiceProfile.RESTRICTED.toString());
         };
         ServiceProfile.prototype.logout = function () {
             return new ServiceProfile(ServiceProfile.LOGOUT.toString());
@@ -8591,21 +9358,34 @@ var Manifesto;
             return new ServiceProfile(ServiceProfile.UIEXTENSIONS.toString());
         };
         ServiceProfile.AUTOCOMPLETE = new ServiceProfile("http://iiif.io/api/search/0/autocomplete");
-        ServiceProfile.CLICKTHROUGH = new ServiceProfile("http://wellcomelibrary.org/ld/iiif-ext/0/accept-terms-click-through");
+        ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE0 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/compliance.html#level0");
         ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE1 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/compliance.html#level1");
         ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE2 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/compliance.html#level2");
+        ServiceProfile.STANFORDIIIFIMAGECONFORMANCE0 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/conformance.html#level0");
         ServiceProfile.STANFORDIIIFIMAGECONFORMANCE1 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/conformance.html#level1");
         ServiceProfile.STANFORDIIIFIMAGECONFORMANCE2 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/conformance.html#level2");
+        ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE0 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level0");
         ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE1 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level1");
         ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE2 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level2");
+        ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE0 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/1.1/conformance.html#level0");
         ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE1 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/1.1/conformance.html#level1");
         ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE2 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/1.1/conformance.html#level2");
+        ServiceProfile.IIIF1IMAGELEVEL0 = new ServiceProfile("http://iiif.io/api/image/1/level0.json");
+        ServiceProfile.IIIF1IMAGELEVEL0PROFILE = new ServiceProfile("http://iiif.io/api/image/1/profiles/level0.json");
         ServiceProfile.IIIF1IMAGELEVEL1 = new ServiceProfile("http://iiif.io/api/image/1/level1.json");
+        ServiceProfile.IIIF1IMAGELEVEL1PROFILE = new ServiceProfile("http://iiif.io/api/image/1/profiles/level1.json");
         ServiceProfile.IIIF1IMAGELEVEL2 = new ServiceProfile("http://iiif.io/api/image/1/level2.json");
+        ServiceProfile.IIIF1IMAGELEVEL2PROFILE = new ServiceProfile("http://iiif.io/api/image/1/profiles/level2.json");
+        ServiceProfile.IIIF2IMAGELEVEL0 = new ServiceProfile("http://iiif.io/api/image/2/level0.json");
+        ServiceProfile.IIIF2IMAGELEVEL0PROFILE = new ServiceProfile("http://iiif.io/api/image/2/profiles/level0.json");
         ServiceProfile.IIIF2IMAGELEVEL1 = new ServiceProfile("http://iiif.io/api/image/2/level1.json");
+        ServiceProfile.IIIF2IMAGELEVEL1PROFILE = new ServiceProfile("http://iiif.io/api/image/2/profiles/level1.json");
         ServiceProfile.IIIF2IMAGELEVEL2 = new ServiceProfile("http://iiif.io/api/image/2/level2.json");
+        ServiceProfile.IIIF2IMAGELEVEL2PROFILE = new ServiceProfile("http://iiif.io/api/image/2/profiles/level2.json");
         ServiceProfile.IXIF = new ServiceProfile("http://wellcomelibrary.org/ld/ixif/0/alpha.json");
         ServiceProfile.LOGIN = new ServiceProfile("http://iiif.io/api/auth/0/login");
+        ServiceProfile.CLICKTHROUGH = new ServiceProfile("http://iiif.io/api/auth/0/login/clickthrough");
+        ServiceProfile.RESTRICTED = new ServiceProfile("http://iiif.io/api/auth/0/login/restricted");
         ServiceProfile.LOGOUT = new ServiceProfile("http://iiif.io/api/auth/0/logout");
         ServiceProfile.OTHERMANIFESTATIONS = new ServiceProfile("http://iiif.io/api/otherManifestations.json");
         ServiceProfile.SEARCHWITHIN = new ServiceProfile("http://iiif.io/api/search/0/search");
@@ -8772,7 +9552,6 @@ var Manifesto;
         __extends(Canvas, _super);
         function Canvas(jsonld, options) {
             _super.call(this, jsonld, options);
-            this.ranges = [];
         }
         Canvas.prototype.getImages = function () {
             var images = [];
@@ -8810,11 +9589,15 @@ var Manifesto;
                         profile === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE1.toString() ||
                         profile === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE2.toString() ||
                         profile === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1.toString() ||
-                        profile === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2.toString()) {
+                        profile === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1PROFILE.toString() ||
+                        profile === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2.toString() ||
+                        profile === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2PROFILE.toString()) {
                         uri = id + 'full/' + width + ',' + height + '/0/native.jpg';
                     }
                     else if (profile === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1.toString() ||
-                        profile === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString()) {
+                        profile === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1PROFILE.toString() ||
+                        profile === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString() ||
+                        profile === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2PROFILE.toString()) {
                         uri = id + 'full/' + width + ',' + height + '/0/default.jpg';
                     }
                 }
@@ -8944,7 +9727,8 @@ var Manifesto;
         function Manifest(jsonld, options) {
             _super.call(this, jsonld, options);
             this.index = 0;
-            this.sequences = null;
+            this._ranges = null;
+            this._sequences = null;
             if (this.__jsonld.structures && this.__jsonld.structures.length) {
                 var r = this._getRootRange();
                 this._parseRanges(r, '');
@@ -8999,11 +9783,13 @@ var Manifesto;
             }
         };
         Manifest.prototype.getRanges = function () {
-            var ranges = [];
+            if (this._ranges != null)
+                return this._ranges;
+            this._ranges = [];
             if (this.rootRange) {
-                ranges = this.rootRange.ranges.en().traverseUnique(function (range) { return range.ranges; }).toArray();
+                this._ranges = this.rootRange.ranges.en().traverseUnique(function (range) { return range.ranges; }).toArray();
             }
-            return ranges;
+            return this._ranges;
         };
         Manifest.prototype.getRangeById = function (id) {
             var ranges = this.getRanges();
@@ -9026,19 +9812,19 @@ var Manifesto;
             return null;
         };
         Manifest.prototype.getSequences = function () {
-            if (this.sequences != null)
-                return this.sequences;
-            this.sequences = [];
+            if (this._sequences != null)
+                return this._sequences;
+            this._sequences = [];
             // if IxIF mediaSequences is present, use that. Otherwise fall back to IIIF sequences.
             var children = this.__jsonld.mediaSequences || this.__jsonld.sequences;
             if (children) {
                 for (var i = 0; i < children.length; i++) {
                     var s = children[i];
                     var sequence = new Manifesto.Sequence(s, this.options);
-                    this.sequences.push(sequence);
+                    this._sequences.push(sequence);
                 }
             }
-            return this.sequences;
+            return this._sequences;
         };
         Manifest.prototype.getSequenceByIndex = function (sequenceIndex) {
             return this.getSequences()[sequenceIndex];
@@ -9096,6 +9882,12 @@ var Manifesto;
                 return new Manifesto.ViewingDirection(this.getProperty('viewingDirection'));
             }
             return Manifesto.ViewingDirection.LEFTTORIGHT;
+        };
+        Manifest.prototype.getViewingHint = function () {
+            if (this.getProperty('viewingHint')) {
+                return new Manifesto.ViewingHint(this.getProperty('viewingHint'));
+            }
+            return Manifesto.ViewingHint.EMPTY;
         };
         return Manifest;
     })(Manifesto.IIIFResource);
@@ -9173,7 +9965,7 @@ var Manifesto;
             _super.call(this, jsonld, options);
             this.ranges = [];
         }
-        Range.prototype.getCanvases = function () {
+        Range.prototype.getCanvasIds = function () {
             if (this.__jsonld.canvases) {
                 return this.__jsonld.canvases;
             }
@@ -9228,6 +10020,7 @@ var Manifesto;
                 for (var i = 0; i < children.length; i++) {
                     var c = children[i];
                     var canvas = new Manifesto.Canvas(c, this.options);
+                    canvas.index = i;
                     this.canvases.push(canvas);
                 }
             }
@@ -9375,17 +10168,10 @@ var Manifesto;
         };
         Sequence.prototype.getThumbs = function (width, height) {
             var thumbs = [];
-            for (var i = 0; i < this.getTotalCanvases(); i++) {
+            var totalCanvases = this.getTotalCanvases();
+            for (var i = 0; i < totalCanvases; i++) {
                 var canvas = this.getCanvasByIndex(i);
-                //if (!_isNumber(height)) {
-                var heightRatio = canvas.getHeight() / canvas.getWidth();
-                if (heightRatio) {
-                    height = Math.floor(width * heightRatio);
-                }
-                //}
-                var uri = canvas.getThumbUri(width, height);
-                var label = canvas.getLabel();
-                thumbs.push(new Manifesto.Thumb(i, uri, label, width, height, true));
+                thumbs.push(new Manifesto.Thumb(width, canvas));
             }
             return thumbs;
         };
@@ -9547,13 +10333,16 @@ var Manifesto;
 var Manifesto;
 (function (Manifesto) {
     var Thumb = (function () {
-        function Thumb(index, uri, label, width, height, visible) {
-            this.index = index;
-            this.uri = uri;
-            this.label = label;
+        function Thumb(width, canvas) {
+            this.data = canvas;
+            this.index = canvas.index;
             this.width = width;
-            this.height = height;
-            this.visible = visible;
+            var heightRatio = canvas.getHeight() / canvas.getWidth();
+            if (heightRatio) {
+                this.height = Math.floor(this.width * heightRatio);
+            }
+            this.uri = canvas.getThumbUri(width, this.height);
+            this.label = canvas.getLabel();
         }
         return Thumb;
     })();
@@ -9570,6 +10359,15 @@ var Manifesto;
         TreeNode.prototype.addNode = function (node) {
             this.nodes.push(node);
             node.parentNode = this;
+        };
+        TreeNode.prototype.isCollection = function () {
+            return this.data.type === Manifesto.TreeNodeType.COLLECTION.toString();
+        };
+        TreeNode.prototype.isManifest = function () {
+            return this.data.type === Manifesto.TreeNodeType.MANIFEST.toString();
+        };
+        TreeNode.prototype.isRange = function () {
+            return this.data.type === Manifesto.TreeNodeType.RANGE.toString();
         };
         return TreeNode;
     })();
@@ -9654,7 +10452,7 @@ var Manifesto;
                 request.end();
             });
         };
-        Utils.loadExternalResource = function (resource, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
+        Utils.loadExternalResource = function (resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
             return new Promise(function (resolve, reject) {
                 if (options && options.pessimisticAccessControl) {
                     // pessimistic: access control cookies may have been deleted.
@@ -9666,19 +10464,22 @@ var Manifesto;
                             if (resource.clickThroughService) {
                                 resolve(clickThrough(resource));
                             }
+                            else if (resource.restrictedService) {
+                                resolve(restricted(resource));
+                            }
                             else {
                                 login(resource).then(function () {
-                                    getAccessToken(resource).then(function (token) {
+                                    getAccessToken(resource, true).then(function (token) {
                                         resource.getData(token).then(function () {
                                             resolve(handleResourceResponse(resource));
-                                        })["catch"](function (error) {
-                                            reject(error);
+                                        })["catch"](function (message) {
+                                            reject(Utils.createInternalServerError(message));
                                         });
-                                    })["catch"](function (error) {
-                                        reject(error);
+                                    })["catch"](function (message) {
+                                        reject(Utils.createInternalServerError(message));
                                     });
-                                })["catch"](function (error) {
-                                    reject(error);
+                                })["catch"](function (message) {
+                                    reject(Utils.createInternalServerError(message));
                                 });
                             }
                         }
@@ -9686,8 +10487,8 @@ var Manifesto;
                             // this info.json isn't access controlled, therefore no need to request an access token.
                             resolve(resource);
                         }
-                    })["catch"](function (error) {
-                        reject(error);
+                    })["catch"](function (message) {
+                        reject(Utils.createInternalServerError(message));
                     });
                 }
                 else {
@@ -9707,33 +10508,53 @@ var Manifesto;
                                 else {
                                     // otherwise, load the resource data to determine the correct access control services.
                                     // if access controlled, do login.
-                                    Utils.authorize(resource, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken).then(function () {
+                                    Utils.authorize(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken).then(function () {
                                         resolve(handleResourceResponse(resource));
                                     })["catch"](function (error) {
-                                        reject(error);
+                                        if (resource.restrictedService) {
+                                            reject(Utils.createRestrictedError());
+                                        }
+                                        else {
+                                            reject(Utils.createAuthorizationFailedError());
+                                        }
                                     });
                                 }
                             })["catch"](function (error) {
-                                reject(error);
+                                reject(Utils.createAuthorizationFailedError());
                             });
                         }
                         else {
-                            Utils.authorize(resource, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken).then(function () {
+                            Utils.authorize(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken).then(function () {
                                 resolve(handleResourceResponse(resource));
                             })["catch"](function (error) {
-                                reject(error);
+                                reject(Utils.createAuthorizationFailedError());
                             });
                         }
                     })["catch"](function (error) {
-                        reject(error);
+                        reject(Utils.createAuthorizationFailedError());
                     });
                 }
             });
         };
-        Utils.loadExternalResources = function (resources, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
+        Utils.createError = function (name, message) {
+            var error = new Error();
+            error.message = message;
+            error.name = name;
+            return error;
+        };
+        Utils.createAuthorizationFailedError = function () {
+            return Utils.createError(manifesto.StatusCodes.AUTHORIZATION_FAILED.toString(), "Authorization failed");
+        };
+        Utils.createRestrictedError = function () {
+            return Utils.createError(manifesto.StatusCodes.RESTRICTED.toString(), "Restricted");
+        };
+        Utils.createInternalServerError = function (message) {
+            return Utils.createError(manifesto.StatusCodes.INTERNAL_SERVER_ERROR.toString(), message);
+        };
+        Utils.loadExternalResources = function (resources, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
             return new Promise(function (resolve, reject) {
                 var promises = _map(resources, function (resource) {
-                    return Utils.loadExternalResource(resource, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options);
+                    return Utils.loadExternalResource(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options);
                 });
                 Promise.all(promises)
                     .then(function () {
@@ -9743,7 +10564,7 @@ var Manifesto;
                 });
             });
         };
-        Utils.authorize = function (resource, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken) {
+        Utils.authorize = function (resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken) {
             return new Promise(function (resolve, reject) {
                 resource.getData().then(function () {
                     if (resource.isAccessControlled()) {
@@ -9751,58 +10572,47 @@ var Manifesto;
                             if (storedAccessToken) {
                                 // try using the stored access token
                                 resource.getData(storedAccessToken).then(function () {
-                                    resolve(resource);
-                                })["catch"](function (error) {
-                                    reject(error);
+                                    if (resource.status === HTTPStatusCode.OK) {
+                                        resolve(resource); // happy path ended
+                                    }
+                                    else {
+                                        // the stored token is no good for this resource
+                                        Utils.showAuthInteraction(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, resolve, reject);
+                                    }
+                                })["catch"](function (message) {
+                                    reject(Utils.createInternalServerError(message));
                                 });
                             }
                             else {
-                                if (resource.status === HTTPStatusCode.MOVED_TEMPORARILY && !resource.isResponseHandled) {
-                                    // if the resource was redirected to a degraded version
-                                    // and the response hasn't been handled yet.
-                                    // if the client wishes to trigger a login, set resource.isResponseHandled to true
-                                    // and call loadExternalResources() again passing the resource.
-                                    resolve(resource);
-                                }
-                                else if (resource.clickThroughService && !resource.isResponseHandled) {
-                                    // if the resource has a click through service, use that.
-                                    clickThrough(resource).then(function () {
-                                        getAccessToken(resource).then(function (accessToken) {
-                                            storeAccessToken(resource, accessToken, tokenStorageStrategy).then(function () {
-                                                resource.getData(accessToken).then(function () {
+                                // There was no stored token, but the user might have a cookie that will grant a token
+                                getAccessToken(resource, false).then(function (accessToken) {
+                                    if (accessToken) {
+                                        storeAccessToken(resource, accessToken, tokenStorageStrategy).then(function () {
+                                            // try using the fresh access token
+                                            resource.getData(accessToken).then(function () {
+                                                if (resource.status === HTTPStatusCode.OK) {
                                                     resolve(resource);
-                                                })["catch"](function (error) {
-                                                    reject(error);
-                                                });
-                                            })["catch"](function (error) {
-                                                reject(error);
+                                                }
+                                                else {
+                                                    // User has a token, but it's not good enough
+                                                    Utils.showAuthInteraction(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, resolve, reject);
+                                                }
+                                            })["catch"](function (message) {
+                                                reject(Utils.createInternalServerError(message));
                                             });
-                                        })["catch"](function (error) {
-                                            reject(error);
+                                        })["catch"](function (message) {
+                                            // not able to store access token
+                                            reject(Utils.createInternalServerError(message));
                                         });
-                                    });
-                                }
-                                else {
-                                    // get an access token
-                                    login(resource).then(function () {
-                                        getAccessToken(resource).then(function (accessToken) {
-                                            storeAccessToken(resource, accessToken, tokenStorageStrategy).then(function () {
-                                                resource.getData(accessToken).then(function () {
-                                                    resolve(resource);
-                                                })["catch"](function (error) {
-                                                    reject(error);
-                                                });
-                                            })["catch"](function (error) {
-                                                reject(error);
-                                            });
-                                        })["catch"](function (error) {
-                                            reject(error);
-                                        });
-                                    });
-                                }
+                                    }
+                                    else {
+                                        // The user did not have a cookie that granted a token
+                                        Utils.showAuthInteraction(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, resolve, reject);
+                                    }
+                                });
                             }
-                        })["catch"](function (error) {
-                            reject(error);
+                        })["catch"](function (message) {
+                            reject(Utils.createInternalServerError(message));
                         });
                     }
                     else {
@@ -9812,6 +10622,55 @@ var Manifesto;
                 });
             });
         };
+        Utils.showAuthInteraction = function (resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, resolve, reject) {
+            if (resource.status === HTTPStatusCode.MOVED_TEMPORARILY && !resource.isResponseHandled) {
+                // if the resource was redirected to a degraded version
+                // and the response hasn't been handled yet.
+                // if the client wishes to trigger a login, set resource.isResponseHandled to true
+                // and call loadExternalResources() again passing the resource.
+                resolve(resource);
+            }
+            else if (resource.restrictedService) {
+                resolve(restricted(resource));
+            }
+            else if (resource.clickThroughService && !resource.isResponseHandled) {
+                // if the resource has a click through service, use that.
+                clickThrough(resource).then(function () {
+                    getAccessToken(resource, true).then(function (accessToken) {
+                        storeAccessToken(resource, accessToken, tokenStorageStrategy).then(function () {
+                            resource.getData(accessToken).then(function () {
+                                resolve(resource);
+                            })["catch"](function (message) {
+                                reject(Utils.createInternalServerError(message));
+                            });
+                        })["catch"](function (message) {
+                            reject(Utils.createInternalServerError(message));
+                        });
+                    })["catch"](function (message) {
+                        reject(Utils.createInternalServerError(message));
+                    });
+                });
+            }
+            else {
+                // get an access token
+                login(resource).then(function () {
+                    getAccessToken(resource, true).then(function (accessToken) {
+                        storeAccessToken(resource, accessToken, tokenStorageStrategy).then(function () {
+                            resource.getData(accessToken).then(function () {
+                                resolve(resource);
+                            })["catch"](function (message) {
+                                reject(Utils.createInternalServerError(message));
+                            });
+                        })["catch"](function (message) {
+                            reject(Utils.createInternalServerError(message));
+                        });
+                    })["catch"](function (message) {
+                        reject(Utils.createInternalServerError(message));
+                    });
+                });
+            }
+        };
+        ;
         Utils.getService = function (resource, profile) {
             var services = this.getServices(resource);
             // coerce profile to string
@@ -9883,6 +10742,12 @@ global.manifesto = module.exports = {
     TreeNodeType: new Manifesto.TreeNodeType(),
     ViewingDirection: new Manifesto.ViewingDirection(),
     ViewingHint: new Manifesto.ViewingHint(),
+    StatusCodes: {
+        AUTHORIZATION_FAILED: 1,
+        FORBIDDEN: 2,
+        INTERNAL_SERVER_ERROR: 3,
+        RESTRICTED: 4
+    },
     create: function (manifest, options) {
         return Manifesto.Deserialiser.parse(manifest, options);
     },
@@ -9894,26 +10759,77 @@ global.manifesto = module.exports = {
         return new Manifesto.TreeNode();
     },
     isImageProfile: function (profile) {
-        if (profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE1.toString() ||
+        if (profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE0.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE1.toString() ||
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE0.toString() ||
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE1.toString() ||
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE0.toString() ||
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE1.toString() ||
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE0.toString() ||
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE1.toString() ||
             profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL0.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL0PROFILE.toString() ||
             profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1PROFILE.toString() ||
             profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2PROFILE.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL0.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL0PROFILE.toString() ||
             profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1.toString() ||
-            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString()) {
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1PROFILE.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2PROFILE.toString()) {
+            return true;
+        }
+        return false;
+    },
+    isLevel0ImageProfile: function (profile) {
+        if (profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE0.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE0.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE0.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE0.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL0.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL0PROFILE.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL0.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL0PROFILE.toString()) {
+            return true;
+        }
+        return false;
+    },
+    isLevel1ImageProfile: function (profile) {
+        if (profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE1.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE1.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE1.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE1.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1PROFILE.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1PROFILE.toString()) {
+            return true;
+        }
+        return false;
+    },
+    isLevel2ImageProfile: function (profile) {
+        if (profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2PROFILE.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString() ||
+            profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2PROFILE.toString()) {
             return true;
         }
         return false;
     },
     // todo: create hasServiceDescriptor
     // based on @profile and @type (or lack of) can the resource describe associated services?
-    loadExternalResources: function (resources, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
-        return Manifesto.Utils.loadExternalResources(resources, tokenStorageStrategy, clickThrough, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options);
+    loadExternalResources: function (resources, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
+        return Manifesto.Utils.loadExternalResources(resources, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options);
     },
     loadManifest: function (uri) {
         return Manifesto.Utils.loadResource(uri);
@@ -9943,6 +10859,7 @@ global.manifesto = module.exports = {
 /// <reference path="./Sequence.ts" />
 /// <reference path="./Serialisation.ts" />
 /// <reference path="./Service.ts" />
+/// <reference path="./IThumb.ts" />
 /// <reference path="./Thumb.ts" />
 /// <reference path="./ITreeNode.ts" />
 /// <reference path="./TreeNode.ts" />
@@ -17212,17 +18129,285 @@ module.exports = isArguments;
 
 },{}],37:[function(_dereq_,module,exports){
 /**
- * lodash 3.0.2 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+ * lodash 3.2.0 (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <https://lodash.com/license>
  */
-var baseToString = _dereq_('lodash._basetostring');
+var root = _dereq_('lodash._root');
 
-/* Native method references for those with the same name as other `lodash` methods. */
-var nativeMin = Math.min;
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0,
+    MAX_INTEGER = 1.7976931348623157e+308,
+    NAN = 0 / 0;
+
+/** `Object#toString` result references. */
+var funcTag = '[object Function]',
+    genTag = '[object GeneratorFunction]',
+    symbolTag = '[object Symbol]';
+
+/** Used to match leading and trailing whitespace. */
+var reTrim = /^\s+|\s+$/g;
+
+/** Used to detect bad signed hexadecimal string values. */
+var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+
+/** Used to detect binary string values. */
+var reIsBinary = /^0b[01]+$/i;
+
+/** Used to detect octal string values. */
+var reIsOctal = /^0o[0-7]+$/i;
+
+/** Built-in method references without a dependency on `root`. */
+var freeParseInt = parseInt;
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/** Built-in value references. */
+var Symbol = root.Symbol;
+
+/** Used to convert symbols to primitives and strings. */
+var symbolProto = Symbol ? Symbol.prototype : undefined,
+    symbolToString = Symbol ? symbolProto.toString : undefined;
+
+/**
+ * The base implementation of `_.clamp` which doesn't coerce arguments to numbers.
+ *
+ * @private
+ * @param {number} number The number to clamp.
+ * @param {number} [lower] The lower bound.
+ * @param {number} upper The upper bound.
+ * @returns {number} Returns the clamped number.
+ */
+function baseClamp(number, lower, upper) {
+  if (number === number) {
+    if (upper !== undefined) {
+      number = number <= upper ? number : upper;
+    }
+    if (lower !== undefined) {
+      number = number >= lower ? number : lower;
+    }
+  }
+  return number;
+}
+
+/**
+ * Checks if `value` is classified as a `Function` object.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isFunction(_);
+ * // => true
+ *
+ * _.isFunction(/abc/);
+ * // => false
+ */
+function isFunction(value) {
+  // The use of `Object#toString` avoids issues with the `typeof` operator
+  // in Safari 8 which returns 'object' for typed array constructors, and
+  // PhantomJS 1.9 which returns 'function' for `NodeList` instances.
+  var tag = isObject(value) ? objectToString.call(value) : '';
+  return tag == funcTag || tag == genTag;
+}
+
+/**
+ * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
+ * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject(value) {
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && objectToString.call(value) == symbolTag);
+}
+
+/**
+ * Converts `value` to an integer.
+ *
+ * **Note:** This function is loosely based on [`ToInteger`](http://www.ecma-international.org/ecma-262/6.0/#sec-tointeger).
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted integer.
+ * @example
+ *
+ * _.toInteger(3);
+ * // => 3
+ *
+ * _.toInteger(Number.MIN_VALUE);
+ * // => 0
+ *
+ * _.toInteger(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toInteger('3');
+ * // => 3
+ */
+function toInteger(value) {
+  if (!value) {
+    return value === 0 ? value : 0;
+  }
+  value = toNumber(value);
+  if (value === INFINITY || value === -INFINITY) {
+    var sign = (value < 0 ? -1 : 1);
+    return sign * MAX_INTEGER;
+  }
+  var remainder = value % 1;
+  return value === value ? (remainder ? value - remainder : value) : 0;
+}
+
+/**
+ * Converts `value` to a number.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {number} Returns the number.
+ * @example
+ *
+ * _.toNumber(3);
+ * // => 3
+ *
+ * _.toNumber(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toNumber(Infinity);
+ * // => Infinity
+ *
+ * _.toNumber('3');
+ * // => 3
+ */
+function toNumber(value) {
+  if (isObject(value)) {
+    var other = isFunction(value.valueOf) ? value.valueOf() : value;
+    value = isObject(other) ? (other + '') : other;
+  }
+  if (typeof value != 'string') {
+    return value === 0 ? value : +value;
+  }
+  value = value.replace(reTrim, '');
+  var isBinary = reIsBinary.test(value);
+  return (isBinary || reIsOctal.test(value))
+    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
+    : (reIsBadHex.test(value) ? NAN : +value);
+}
+
+/**
+ * Converts `value` to a string if it's not one. An empty string is returned
+ * for `null` and `undefined` values. The sign of `-0` is preserved.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {string} Returns the string.
+ * @example
+ *
+ * _.toString(null);
+ * // => ''
+ *
+ * _.toString(-0);
+ * // => '-0'
+ *
+ * _.toString([1, 2, 3]);
+ * // => '1,2,3'
+ */
+function toString(value) {
+  // Exit early for strings to avoid a performance hit in some environments.
+  if (typeof value == 'string') {
+    return value;
+  }
+  if (value == null) {
+    return '';
+  }
+  if (isSymbol(value)) {
+    return Symbol ? symbolToString.call(value) : '';
+  }
+  var result = (value + '');
+  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+}
 
 /**
  * Checks if `string` ends with the given target string.
@@ -17246,13 +18431,13 @@ var nativeMin = Math.min;
  * // => true
  */
 function endsWith(string, target, position) {
-  string = baseToString(string);
-  target = (target + '');
+  string = toString(string);
+  target = typeof target == 'string' ? target : (target + '');
 
   var length = string.length;
   position = position === undefined
     ? length
-    : nativeMin(position < 0 ? 0 : (+position || 0), length);
+    : baseClamp(toInteger(position), 0, length);
 
   position -= target.length;
   return position >= 0 && string.indexOf(target, position) == position;
@@ -17260,30 +18445,63 @@ function endsWith(string, target, position) {
 
 module.exports = endsWith;
 
-},{"lodash._basetostring":38}],38:[function(_dereq_,module,exports){
+},{"lodash._root":38}],38:[function(_dereq_,module,exports){
+(function (global){
 /**
- * lodash 3.0.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+ * lodash 3.0.0 (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <https://lodash.com/license>
  */
 
+/** Used to determine if values are of the language type `Object`. */
+var objectTypes = {
+  'function': true,
+  'object': true
+};
+
+/** Detect free variable `exports`. */
+var freeExports = (objectTypes[typeof exports] && exports && !exports.nodeType) ? exports : null;
+
+/** Detect free variable `module`. */
+var freeModule = (objectTypes[typeof module] && module && !module.nodeType) ? module : null;
+
+/** Detect free variable `global` from Node.js. */
+var freeGlobal = checkGlobal(freeExports && freeModule && typeof global == 'object' && global);
+
+/** Detect free variable `self`. */
+var freeSelf = checkGlobal(objectTypes[typeof self] && self);
+
+/** Detect free variable `window`. */
+var freeWindow = checkGlobal(objectTypes[typeof window] && window);
+
+/** Detect `this` as the global object. */
+var thisGlobal = checkGlobal(objectTypes[typeof this] && this);
+
 /**
- * Converts `value` to a string if it's not one. An empty string is returned
- * for `null` or `undefined` values.
+ * Used as a reference to the global object.
+ *
+ * The `this` value is used if it's the global object to avoid Greasemonkey's
+ * restricted `window` object, otherwise the `window` object is used.
+ */
+var root = freeGlobal || ((freeWindow !== (thisGlobal && thisGlobal.window)) && freeWindow) || freeSelf || thisGlobal || Function('return this')();
+
+/**
+ * Checks if `value` is a global object.
  *
  * @private
- * @param {*} value The value to process.
- * @returns {string} Returns the string.
+ * @param {*} value The value to check.
+ * @returns {null|Object} Returns `value` if it's a global object, else `null`.
  */
-function baseToString(value) {
-  return value == null ? '' : (value + '');
+function checkGlobal(value) {
+  return (value && value.Object === Object) ? value : null;
 }
 
-module.exports = baseToString;
+module.exports = root;
 
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],39:[function(_dereq_,module,exports){
 /**
  * lodash 3.0.4 (Custom Build) <https://lodash.com/>
@@ -20563,6 +21781,25 @@ return typeof n.toString!="function"&&typeof(n+"")=="string"}}(),Jn=m();typeof d
 define("modernizr", function(){});
 
 (function ($) {
+    $.fn.checkboxButton = function (onClick) {
+        return this.each(function () {
+            var $this = $(this);
+            $this.on('click', function (e) {
+                var tagName = e.target.tagName;
+                var $checkbox;
+                if (tagName !== "INPUT") {
+                    e.preventDefault();
+                    $checkbox = $(this).find(':checkbox');
+                    $checkbox.prop('checked', !$checkbox.prop('checked'));
+                }
+                else {
+                    $checkbox = $(this);
+                }
+                var checked = $checkbox.is(':checked');
+                onClick.call(this, checked);
+            });
+        });
+    };
     $.fn.disable = function () {
         return this.each(function () {
             var $this = $(this);
@@ -20733,9 +21970,25 @@ define("modernizr", function(){});
         var $self = $(this);
         return parseInt($self.css('marginLeft')) + parseInt($self.css('marginRight'));
     };
+    $.fn.leftMargin = function () {
+        var $self = $(this);
+        return parseInt($self.css('marginLeft'));
+    };
+    $.fn.rightMargin = function () {
+        var $self = $(this);
+        return parseInt($self.css('marginRight'));
+    };
     $.fn.horizontalPadding = function () {
         var $self = $(this);
         return parseInt($self.css('paddingLeft')) + parseInt($self.css('paddingRight'));
+    };
+    $.fn.leftPadding = function () {
+        var $self = $(this);
+        return parseInt($self.css('paddingLeft'));
+    };
+    $.fn.rightPadding = function () {
+        var $self = $(this);
+        return parseInt($self.css('paddingRight'));
     };
     $.mlp = { x: 0, y: 0 }; // Mouse Last Position
     function documentHandler() {
