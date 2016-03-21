@@ -1,0 +1,14 @@
+{
+  "modules": {
+    "downloadDialogue": {
+      "options": {
+        "selectionEnabled": true
+      }
+    },
+    "footerPanel": {
+      "options": {
+        "feedbackEnabled": true
+      }
+    }
+  }
+}

@@ -95,6 +95,16 @@
           "label": "Biological Basis of Medicine (collection)"
         },
         {
+          "@id": "http://wellcomelibrary.org/iiif/b21274344/manifest",
+          "@type": "sc:Manifest",
+          "label": "Abnormalities and curiosities of medicine"
+        },
+        {
+          "@id": "http://wellcomelibrary.org/iiif/b21072061/manifest",
+          "@type": "sc:Manifest",
+          "label": "An Atlas of Clinical Microscopy (clinical)"
+        },
+        {
           "@id": "http://showcase.iiif.io/shims/chroniclingamerica/prezi/top.json",
           "@type": "sc:Collection",
           "label": "Chronicling America (collection)",
@@ -113,13 +123,13 @@
       "@id": "http://universalviewer.io/manifests.json",
       "@type": "sc:Collection",
       "label": "Internet Archive",
-      "visible": false,
+      "visible": true,
       "manifests": [
         {
-          "@id": "http://iiif.archivelab.org/platowithenglish04platuoft/manifest.json",
+          "@id": "https://iiif.archivelab.org/iiif/principleofrelat00eins/manifest.json",
           "@type": "sc:Manifest",
-          "label": "Plato, with an English translation",
-          "visible": false
+          "label": "The principle of relativity; original papers",
+          "visible": true
         }
       ]
     },
@@ -302,6 +312,19 @@
       "@context": "http://iiif.io/api/presentation/2/context.json",
       "@id": "http://universalviewer.io/manifests.json",
       "@type": "sc:Collection",
+      "label": "Riks Arkivet",
+      "manifests": [
+        {
+          "@id": "https://iiif.riksarkivet.se/arkis!C0000263/manifest",
+          "@type": "sc:Manifest",
+          "label": "Ervalla kyrkoarkiv (canvas metadata)"
+        }
+      ]
+    },
+    {
+      "@context": "http://iiif.io/api/presentation/2/context.json",
+      "@id": "http://universalviewer.io/manifests.json",
+      "@type": "sc:Collection",
       "label": "Qatar Digital Library",
       "manifests": [
         {
@@ -349,6 +372,18 @@
           "@id": "http://files.universalviewer.io/manifests/foundobjects/thekiss.json",
           "@type": "sc:Manifest",
           "label": "The Kiss"
+        },
+        {
+          "@id": "http://files.universalviewer.io/manifests/wellcome/henry.json",
+          "@type": "sc:Manifest",
+          "label": "Henry Wellcome Life Mask",
+          "visible": false
+        },
+        {
+          "@id": "http://files.universalviewer.io/manifests/demo/nefertiti.json",
+          "@type": "sc:Manifest",
+          "label": "Bust of Queen Nefertiti",
+          "visible": true
         }
       ]
     },
@@ -375,7 +410,7 @@
       "visible": false,
       "manifests": [
         {
-          "@id": "https://ipfs.io/ipfs/QmbqZNSUkf99BxpYXhHMGi41pjqHfZDw8jzEgYnvbQEusn",
+          "@id": "https://ipfs.io/ipfs/QmYomyCpT1vKNovYvTjAStYq31JoaH8xdivjmWcDj5mpM1",
           "@type": "sc:Manifest",
           "label": "Tetons",
           "visible": true
