@@ -58,15 +58,11 @@ $(function() {
 
     function formatUrl(url) {
         var parts = Utils.Urls.GetUrlParts(location.href);
-<<<<<<< HEAD
-        return String.format(url, parts.pathname);
-=======
         var pathname = parts.pathname;
         if (!pathname.startsWith('/')){
             pathname = '/' + pathname;
         }
         return String.format(url, pathname);
->>>>>>> upstream/gh-pages
     }
 
     function loadManifests(cb) {
