@@ -20,6 +20,11 @@
           "label": "Nervous system in a fruit fly larva"
         },
         {
+          "@id": "http://wellcomelibrary.org/iiif/b23984958/manifest",
+          "@type": "sc:Manifest",
+          "label": "Greenfly Eye"
+        },
+        {
           "@id": "http://wellcomelibrary.org/iiif/b18035978/manifest",
           "@type": "sc:Manifest",
           "label": "The Biocrats"
@@ -45,6 +50,11 @@
           "label": "English folding almanac in Latin (video)"
         },
         {
+          "@id": "http://wellcomelibrary.org/iiif/b16748967/manifest",
+          "@type": "sc:Manifest",
+          "label": "Entebbe encounter (video with transcript)"
+        },
+        {
           "@id": "http://wellcomelibrary.org/iiif/b17307922/manifest",
           "@type": "sc:Manifest",
           "label": "Florence Nightingale (audio)"
@@ -52,12 +62,12 @@
         {
           "@id": "http://wellcomelibrary.org/iiif/b17502792/manifest",
           "@type": "sc:Manifest",
-          "label": "Fungal disease in Britain and the United States (PDF)"
+          "label": "A Review of Science Communication and Public Attitudes to Science in Britain (PDF)"
         },
         {
           "@id": "http://wellcomelibrary.org/iiif/b17564980/manifest",
           "@type": "sc:Manifest",
-          "label": "First Thursday Club (login required)"
+          "label": "First Thursday Club (click through)"
         },
         {
           "@id": "http://wellcomelibrary.org/iiif/b19813508/manifest",
@@ -80,6 +90,11 @@
           "label": "Sixteen feet in profile (degraded image)"
         },
         {
+          "@id": "http://wellcomelibrary.org/iiif/b21072061/manifest",
+          "@type": "sc:Manifest",
+          "label": "An Atlas of Clinical Microscopy (clinical login)"
+        },
+        {
           "@id": "http://wellcomelibrary.org/iiif/b19684538/manifest",
           "@type": "sc:Manifest",
           "label": "Pseudo-Albert the Great (folio)"
@@ -100,9 +115,9 @@
           "label": "Abnormalities and curiosities of medicine"
         },
         {
-          "@id": "http://wellcomelibrary.org/iiif/b21072061/manifest",
+          "@id": "http://wellcomelibrary.org/iiif/b13266330/manifest",
           "@type": "sc:Manifest",
-          "label": "An Atlas of Clinical Microscopy (clinical)"
+          "label": "Spiegl de Artzny (manuscript)"
         },
         {
           "@id": "http://showcase.iiif.io/shims/chroniclingamerica/prezi/top.json",
@@ -241,6 +256,11 @@
           "@id": "http://digital.library.villanova.edu/Item/vudl:60609/Manifest"
         },
         {
+          "label": "Letter, To: Ellie From: A. M. Thackara (download options)",
+          "@type": "sc:Manifest",
+          "@id": "http://digital.library.villanova.edu/Item/vudl:30471/Manifest"
+        },
+        {
           "label": "LeBlanc Bibliography, Binder 1",
           "@type": "sc:Manifest",
           "@id": "http://digital.library.villanova.edu/Item/vudl:294631/Manifest",
@@ -295,6 +315,7 @@
       "@id": "http://universalviewer.io/manifests.json",
       "@type": "sc:Collection",
       "label": "World Digital Library",
+      "visible": false,
       "manifests": [
         {
           "@id": "http://www.wdl.org/en/item/14291/iiif/manifest.json",
@@ -343,6 +364,24 @@
       "@context": "http://iiif.io/api/presentation/2/context.json",
       "@id": "http://universalviewer.io/manifests.json",
       "@type": "sc:Collection",
+      "label": "Ghent University Library",
+      "manifests": [
+        {
+          "@id": "http://shared.ugent.be/IIIF/collections/rug01-002212499",
+          "@type": "sc:Collection",
+          "label": "Nalatenschap Raoul De Keyser"
+        },
+        {
+          "@id": "http://shared.ugent.be/IIIF/collections/jan-frans-willems",
+          "@type": "sc:Collection",
+          "label": "Jan Frans Willems"
+        }
+      ]
+    },
+    {
+      "@context": "http://iiif.io/api/presentation/2/context.json",
+      "@id": "http://universalviewer.io/manifests.json",
+      "@type": "sc:Collection",
       "label": "Yale",
       "manifests": [
         {
@@ -372,6 +411,12 @@
           "@id": "http://files.universalviewer.io/manifests/foundobjects/thekiss.json",
           "@type": "sc:Manifest",
           "label": "The Kiss"
+        },
+        {
+          "@id": "http://files.universalviewer.io/manifests/nelis/skull.json",
+          "@type": "sc:Manifest",
+          "label": "Skull",
+          "visible": true
         },
         {
           "@id": "http://files.universalviewer.io/manifests/wellcome/henry.json",
@@ -406,8 +451,29 @@
       "@context": "http://iiif.io/api/presentation/2/context.json",
       "@id": "http://universalviewer.io/manifests.json",
       "@type": "sc:Collection",
+      "label": "Tests",
+      "visible": true,
+      "manifests": [
+        {
+          "@id": "http://tomcrane.github.io/scratch/manifests/top-to-bottom.json",
+          "@type": "sc:Manifest",
+          "label": "Top to Bottom",
+          "visible": true
+        },
+        {
+          "@id": "http://tomcrane.github.io/scratch/manifests/bottom-to-top.json",
+          "@type": "sc:Manifest",
+          "label": "Bottom to Top",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "@context": "http://iiif.io/api/presentation/2/context.json",
+      "@id": "http://universalviewer.io/manifests.json",
+      "@type": "sc:Collection",
       "label": "IPFS",
-      "visible": false,
+      "visible": true,
       "manifests": [
         {
           "@id": "https://ipfs.io/ipfs/QmYomyCpT1vKNovYvTjAStYq31JoaH8xdivjmWcDj5mpM1",
