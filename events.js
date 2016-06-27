@@ -3,7 +3,7 @@
     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 ga('create', 'id', 'auto');
-ga('send', 'pageview');
+//ga('send', 'pageview'); do not track app.html
 function trackEvent(category, action, label) {
     ga('send', 'event', category, action, label);
 }
@@ -385,6 +385,10 @@ $(function() {
 
     $(document).bind('seadragonExtension.onPrevSearchResult', function (event, obj) {
         console.log('seadragonExtension.onPrevSearchResult');
+    });
+
+    $(document).bind('seadragonExtension.onPrint', function (event, obj) {
+        console.log('seadragonExtension.onPrint', obj);
     });
 
     $(document).bind('seadragonExtension.onAnimation', function (event, obj) {
