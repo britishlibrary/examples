@@ -8,7 +8,8 @@
     "footerPanel": {
       "options": {
         "feedbackEnabled": true,
-        "printEnabled": true
+        "printEnabled": true,
+        "embedEnabled": true
       }
     }
   }
