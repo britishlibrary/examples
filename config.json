@@ -11,6 +11,16 @@
         "printEnabled": true,
         "embedEnabled": true
       }
+    },
+    "seadragonCenterPanel": {
+      "options": {
+        "attributionEnabled": false
+      }
+    },
+    "searchFooterPanel": {
+      "options": {
+        "positionMarkerEnabled": false
+      }
     }
   }
 }
