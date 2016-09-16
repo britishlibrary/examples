@@ -10,7 +10,10 @@
         "selectionEnabled": true
       },
       "content": {
-        "downloadSelection": "Select pages for download"
+        "downloadSelection": "Select pages for download",
+        "wholeImageHighRes": "Large image {0} x {1}px",
+        "wholeImagesHighRes": "Both images ({0})",
+        "wholeImageLowResAsJpg": "Standard image {0} x {1}px"
       }
     },
     "footerPanel": {
