@@ -1,25 +1,59 @@
 {
   "modules": {
+    "contentLeftPanel": {
+      "options": {
+        "treeEnabled": false
+      }
+    },
     "downloadDialogue": {
       "options": {
         "selectionEnabled": true
+      },
+      "content": {
+        "downloadSelection": "Select pages for download"
       }
     },
     "footerPanel": {
       "options": {
         "feedbackEnabled": true,
         "printEnabled": true,
-        "embedEnabled": true
+        "embedEnabled": true,
+        "minimiseButtons": false
+      },
+      "content": {
+        "embed": "Embed",
+        "feedback": "Send feedback"
+      }
+    },
+    "moreInfoRightPanel": {
+      "content": {
+        "title": "About this item"
+      }
+    },
+    "pagingHeaderPanel": {
+      "options": {
+        "pageModeEnabled": false
+      },
+      "content": {
+        "gallery": "Thumbnail View",
+        "image": "Viewing"
       }
     },
     "seadragonCenterPanel": {
       "options": {
-        "attributionEnabled": false
+        "attributionEnabled": false,
+        "autoHideControls": false
       }
     },
     "searchFooterPanel": {
       "options": {
         "positionMarkerEnabled": false
+      }
+    },
+    "settingsDialogue": {
+      "content": {
+        "preserveViewport": "Keep zoom level the same between pages",
+        "navigatorEnabled": "Turn on overview box"
       }
     }
   }
