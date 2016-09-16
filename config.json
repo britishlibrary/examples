@@ -53,7 +53,8 @@
     "settingsDialogue": {
       "content": {
         "preserveViewport": "Keep zoom level the same between pages",
-        "navigatorEnabled": "Turn on overview box"
+        "navigatorEnabled": "Turn on overview box",
+        "website": "<a href='https://github.com/universalviewer/universalviewer#contributors'>more info</a>"
       }
     }
   }
