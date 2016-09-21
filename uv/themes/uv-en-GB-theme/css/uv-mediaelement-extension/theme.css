@@ -3039,6 +3039,9 @@ input[type=range]:focus::-ms-fill-upper {
   height: 30px;
   line-height: 30px;
 }
+#app .overlay.multiSelect .middle .content h1 {
+  border-bottom: none;
+}
 #app .footerPanel .searchPager .controls {
   margin-top: 0px;
 }
