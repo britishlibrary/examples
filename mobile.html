@@ -22,13 +22,24 @@
 
 <div class="uv left" data-config="/config.json" data-uri="http://api.bl.uk/metadata/iiif/ark:/81055/vdc_100022545251.0x000002/manifest.json" style="background-color: #000"></div>
 
+<<<<<<< HEAD
 <script type="text/javascript" id="embedUV" src="http://bltesters.azurewebsites.net/uv/lib/embed.js"></script><script type="text/javascript">/* wordpress fix */</script>
 
 <!--<script type="text/javascript" id="embedUV" src="http://localhost:8001/src/lib/embed.js"></script><script type="text/javascript">/* wordpress fix */</script>-->
 
+=======
+>>>>>>> upstream/gh-pages
 <script>
 
     $(function() {
+
+        var isLocalhost = document.location.href.indexOf('localhost') != -1;
+
+        if (isLocalhost){
+            $('body').append('<script type="text/javascript" id="embedUV" src="/src/lib/embed.js"><\/script>');
+        } else {
+            $('body').append('<script type="text/javascript" id="embedUV" src="http://universalviewer.io/examples/uv/lib/embed.js"><\/script>');
+        }
 
         var $UV = $('.uv');
 
