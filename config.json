@@ -36,7 +36,8 @@
       "content": {
         "attribution": "Usage Terms",
         "title": "About this item",
-        "license": "Licence"
+        "license": "Licence",
+        "manifestHeader": ""
       }
     },
     "pagingHeaderPanel": {
