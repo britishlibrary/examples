@@ -34,7 +34,9 @@
     },
     "moreInfoRightPanel": {
       "content": {
-        "title": "About this item"
+        "attribution": "Usage Terms",
+        "title": "About this item",
+        "license": "Licence"
       }
     },
     "pagingHeaderPanel": {
